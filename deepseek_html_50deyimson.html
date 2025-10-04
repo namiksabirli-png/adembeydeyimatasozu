@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YANIT YAYINLARI - Etkinlikli Deyimler ve Atasözleri Soru Bankası</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .header-text {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .book-cover {
+            width: 120px;
+            height: 160px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            font-weight: normal;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .screen {
+            display: none;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .alphabet-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .alphabet-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .alphabet-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.1);
+        }
+        
+        .selected-letter {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        
+        .set-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .set-btn {
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .set-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .set-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .question-container {
+            margin-bottom: 30px;
+        }
+        
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            padding: 15px;
+            background-color: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .option:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .correct {
+            background-color: #2ecc71;
+            color: white;
+            border-color: #27ae60;
+        }
+        
+        .incorrect {
+            background-color: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+        }
+        
+        .show-correct {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .disabled {
+            pointer-events: none;
+        }
+        
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 1.3rem;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .next-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .next-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .retry-btn {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        .retry-btn:hover {
+            background-color: #d35400;
+        }
+        
+        .result-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .result-score {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        .wrong-answers {
+            text-align: left;
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .wrong-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #e74c3c;
+        }
+        
+        .wrong-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .wrong-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .wrong-correct {
+            color: #2ecc71;
+        }
+        
+        .wrong-incorrect {
+            color: #e74c3c;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .book-cover {
+                width: 100px;
+                height: 140px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .alphabet-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .question {
+                font-size: 1.2rem;
+            }
+            
+            .option {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <!-- Sol taraftaki kitap kapağı -->
+                <img src="https://namiksabirli-png.github.io/adembeydeyimatasozu//yanit_deyim_atasozu_sbkapak.jpeg" class="book-cover">
+                
+                <div class="header-text">
+                    <h1>YANIT YAYINLARI</h1>
+                    <p class="subtitle">"ETKİNLİKLİ DEYİMLER VE ATASÖZLERİ SORU BANKASI"</p>
+                    <p class="description">İNTERAKTİF QUİZ UYGULAMASI</p>
+                </div>
+                
+                <!-- Sağ taraftaki kitap kapağı -->
+                <img src="https://namiksabirli-png.github.io/adembeydeyimatasozu//yanit_deyim_atasozu_sbkapak.jpeg" class="book-cover">
+            </div>
+        </header>
+        
+        <!-- Ana Ekran -->
+        <div id="main-screen" class="screen active">
+            <h2>Harfe Göre Deyim Seçin</h2>
+            <div class="alphabet-buttons" id="alphabet-buttons">
+                <!-- Alfabe butonları JavaScript ile eklenecek -->
+            </div>
+            <div class="selected-letter" id="selected-letter"></div>
+            <div class="set-buttons" id="set-buttons">
+                <!-- Set butonları JavaScript ile eklenecek -->
+            </div>
+        </div>
+        
+        <!-- Quiz Ekranı -->
+        <div id="quiz-screen" class="screen">
+            <div class="progress">
+                <span id="current-question">Soru 1/10</span>
+                <span id="score">Doğru: 0 | Yanlış: 0</span>
+            </div>
+            <div class="question-container">
+                <div class="question" id="question-text"></div>
+                <div class="options" id="options-container">
+                    <!-- Seçenekler JavaScript ile eklenecek -->
+                </div>
+            </div>
+            <div class="score" id="feedback"></div>
+        </div>
+        
+        <!-- Sonuç Ekranı -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <h2 class="result-title">Set Tamamlandı!</h2>
+                <div class="result-score" id="final-score"></div>
+                <div class="action-buttons">
+                    <button id="retry-wrong-btn" class="action-btn retry-btn">Yanlışları Tekrar Sor</button>
+                    <button id="next-set-btn" class="action-btn next-btn">Sonraki Set</button>
+                </div>
+                <div class="wrong-answers" id="wrong-answers-container">
+                    <h3 class="wrong-title">Yanlış Cevapladığınız Sorular</h3>
+                    <!-- Yanlış cevaplar JavaScript ile eklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Deyim verileri
+        const idioms = [
+            { id: 1, idiom: "Aba altından sopa göstermek", meaning: "birini imalı bir biçimde tehdit etmek" },
+            { id: 2, idiom: "Abesle iştigal etmek", meaning: "yersiz, yararsız işlerle vakit öldürmek" },
+            { id: 3, idiom: "Açığa çıkarmak", meaning: "gizli kalmış bir şeyi ortaya çıkarmak" },
+            { id: 4, idiom: "Açık vermek", meaning: "yanlış bir davranışta bulunmak" },
+            { id: 5, idiom: "Açlık beynine vurmak", meaning: "açlıktan düşünemez hale gelmek" },
+            { id: 6, idiom: "Adım atmak", meaning: "bir işe başlamak" },
+            { id: 7, idiom: "Adını anmak", meaning: "birinden söz etmek" },
+            { id: 8, idiom: "Adını vermek", meaning: "birinin kimliğini açıklamak" },
+            { id: 9, idiom: "Ağır başlı", meaning: "ciddi, olgun davranışlı" },
+            { id: 10, idiom: "Ağır yara almak", meaning: "büyük zarar görmek" },
+            { id: 11, idiom: "Ağız birliği etmek", meaning: "söz birliği yapmak" },
+            { id: 12, idiom: "Ağız değiştirmek", meaning: "daha önce söylediğinin tersini söylemek" },
+            { id: 13, idiom: "Ağız eğmemek", meaning: "hiç kimseye yalvarmamak" },
+            { id: 14, idiom: "Ağzı dili bağlanmak", meaning: "şaşırıp konuşamaz olmak" },
+            { id: 15, idiom: "Ağzı kulaklarına varmak", meaning: "çok sevinmek" },
+            { id: 16, idiom: "Ağzı sıkı", meaning: "sır saklayan" },
+            { id: 17, idiom: "Ağzı süt kokmak", meaning: "çok genç ve tecrübesiz olmak" },
+            { id: 18, idiom: "Ağzı yanmak", meaning: "acı bir deneyim yaşamak" },
+            { id: 19, idiom: "Ağzına baktırmak", meaning: "sözünü dinletmek" },
+            { id: 20, idiom: "Ağzına bir parmak bal çalmak", meaning: "geçici olarak kandırmak" },
+            { id: 21, idiom: "Ağzına kilit vurmak", meaning: "hiç konuşmamak" },
+            { id: 22, idiom: "Ağzına sağlık", meaning: "söylediği güzel söz için teşekkür etmek" },
+            { id: 23, idiom: "Ağzına tıkmak", meaning: "zorla yedirmek" },
+            { id: 24, idiom: "Ağzına yakışmak", meaning: "uygun söz söylemek" },
+            { id: 25, idiom: "Ağzında bakla ıslanmamak", meaning: "sır saklayamamak" },
+            { id: 26, idiom: "Ağzında sakız gibi çiğnemek", meaning: "bir sözü tekrarlayıp durmak" },
+            { id: 27, idiom: "Ağzından bal damlamak", meaning: "çok tatlı konuşmak" },
+            { id: 28, idiom: "Ağzından çıkanı kulağı duymamak", meaning: "söylediğine pişman olmak" },
+            { id: 29, idiom: "Ağzından kaçırmak", meaning: "istemeyerek söylemek" },
+            { id: 30, idiom: "Ağzından yel alsın", meaning: "kötü sözü gerçekleşmesin" },
+            { id: 31, idiom: "Ağzını açıp gözünü yummak", meaning: "kızgınlıkla ağzına geleni söylemek" },
+            { id: 32, idiom: "Ağzını bıçak açmamak", meaning: "hiç konuşmamak" },
+            { id: 33, idiom: "Ağzını hayra aç", meaning: "iyi şeyler bekle" },
+            { id: 34, idiom: "Ağzını kilitlemek", meaning: "konuşmamak" },
+            { id: 35, idiom: "Ağzını mühürlemek", meaning: "konuşmasını engellemek" },
+            { id: 36, idiom: "Ağzının içine bakmak", meaning: "söyleyeceği sözü beklemek" },
+            { id: 37, idiom: "Ağzının suyu akmak", meaning: "imrenmek" },
+            { id: 38, idiom: "Ağzının tadı yerine gelmek", meaning: "keyfi yerine gelmek" },
+            { id: 39, idiom: "Ahı gitmek vahı kalmak", meaning: "çok zayıf düşmek" },
+            { id: 40, idiom: "Akıl almamak", meaning: "inanılmaz olmak" },
+            { id: 41, idiom: "Akıl danışmak", meaning: "fikir sormak" },
+            { id: 42, idiom: "Akıl hocalığı taslamak", meaning: "bilmişlik taslamak" },
+            { id: 43, idiom: "Akıl vermek", meaning: "öğüt vermek" },
+            { id: 44, idiom: "Akıldan çıkarmamak", meaning: "unutmak istememek" },
+            { id: 45, idiom: "Akıntıya karşı kürek çekmek", meaning: "zor bir işe girişmek" },
+            { id: 46, idiom: "Akla karayı seçmek", meaning: "çok zahmet çekmek" },
+            { id: 47, idiom: "Aklı almamak", meaning: "anlayamamak" },
+            { id: 48, idiom: "Aklı başından gitmek", meaning: "şaşkınlaşmak" },
+            { id: 49, idiom: "Aklı beş karış yukarıda olmak", meaning: "dalgın olmak" },
+            { id: 50, idiom: "Aklı çıkmak", meaning: "çok korkmak" }
+        ];
+
+        // Yanlış seçenekler için sahte deyim anlamları
+        const fakeMeanings = [
+            "bir işi çabucak bitirmek",
+            "gizli bir amaç gütmek",
+            "bir şeyi abartmak",
+            "birini kandırmak",
+            "çok çalışmak",
+            "bir işi yarıda bırakmak",
+            "sıkıntılı bir durumdan kurtulmak",
+            "birine yardım etmek",
+            "bir işi başarmak",
+            "bir şeyi anlamak",
+            "birini utandırmak",
+            "bir işi ertelemek",
+            "birine kızmak",
+            "bir şeyi beğenmemek",
+            "bir işi kolayca yapmak",
+            "birini övmek",
+            "bir şeyi saklamak",
+            "birine inanmak",
+            "bir işi başlatmak",
+            "bir şeyi fark etmek",
+            "birine güvenmek",
+            "bir işi bitirmek",
+            "bir şeyi unutmak",
+            "birini sevmek",
+            "bir işi denemek",
+            "bir şeyi kaybetmek",
+            "birine yardım etmek",
+            "bir işi planlamak",
+            "bir şeyi bulmak",
+            "birini affetmek"
+        ];
+
+        // Ses efektleri
+        function playCorrectSound() {
+            // Basit bir doğru ses efekti
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+        
+        function playIncorrectSound() {
+            // Basit bir yanlış ses efekti
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 300;
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Uygulama durumu
+        let state = {
+            currentScreen: 'main',
+            selectedLetter: '',
+            currentSet: 1,
+            currentQuestionIndex: 0,
+            score: { correct: 0, incorrect: 0 },
+            questions: [],
+            wrongAnswers: []
+        };
+
+        // DOM elementleri
+        const mainScreen = document.getElementById('main-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const alphabetButtons = document.getElementById('alphabet-buttons');
+        const selectedLetter = document.getElementById('selected-letter');
+        const setButtons = document.getElementById('set-buttons');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestion = document.getElementById('current-question');
+        const scoreElement = document.getElementById('score');
+        const feedback = document.getElementById('feedback');
+        const finalScore = document.getElementById('final-score');
+        const retryWrongBtn = document.getElementById('retry-wrong-btn');
+        const nextSetBtn = document.getElementById('next-set-btn');
+        const wrongAnswersContainer = document.getElementById('wrong-answers-container');
+
+        // Alfabe butonlarını oluştur
+        function createAlphabetButtons() {
+            const alphabet = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+            for (let letter of alphabet) {
+                const button = document.createElement('button');
+                button.className = 'alphabet-btn';
+                button.textContent = letter;
+                button.addEventListener('click', () => selectLetter(letter));
+                alphabetButtons.appendChild(button);
+            }
+        }
+
+        // Harf seçildiğinde
+        function selectLetter(letter) {
+            state.selectedLetter = letter;
+            selectedLetter.textContent = `Seçilen Harf: ${letter}`;
+            createSetButtons();
+        }
+
+        // Set butonlarını oluştur
+        function createSetButtons() {
+            setButtons.innerHTML = '';
+            for (let i = 1; i <= 4; i++) {
+                const button = document.createElement('button');
+                button.className = 'set-btn';
+                button.textContent = `Set-${i}`;
+                button.addEventListener('click', () => startSet(i));
+                setButtons.appendChild(button);
+            }
+        }
+
+        // Set başlat
+        function startSet(setNumber) {
+            state.currentSet = setNumber;
+            state.currentQuestionIndex = 0;
+            state.score = { correct: 0, incorrect: 0 };
+            state.wrongAnswers = [];
+            
+            // Seçilen harfle başlayan deyimleri filtrele
+            const filteredIdioms = idioms.filter(idiom => 
+                idiom.idiom.toLowerCase().startsWith(state.selectedLetter.toLowerCase())
+            );
+            
+            // 10 soruluk set oluştur
+            state.questions = [];
+            for (let i = 0; i < 10 && i < filteredIdioms.length; i++) {
+                const question = createQuestion(filteredIdioms[i]);
+                state.questions.push(question);
+            }
+            
+            // Eğer yeterli soru yoksa, rastgele deyimler ekle
+            while (state.questions.length < 10) {
+                const randomIdiom = idioms[Math.floor(Math.random() * idioms.length)];
+                const question = createQuestion(randomIdiom);
+                // Aynı soruyu eklemediğinden emin ol
+                if (!state.questions.some(q => q.idiom === question.idiom)) {
+                    state.questions.push(question);
+                }
+            }
+            
+            showScreen('quiz');
+            displayQuestion();
+        }
+
+        // Soru oluştur
+        function createQuestion(correctIdiom) {
+            // Yanlış seçenekler için rastgele anlamlar seç
+            const wrongOptions = [];
+            while (wrongOptions.length < 2) {
+                const randomMeaning = fakeMeanings[Math.floor(Math.random() * fakeMeanings.length)];
+                if (randomMeaning !== correctIdiom.meaning && !wrongOptions.includes(randomMeaning)) {
+                    wrongOptions.push(randomMeaning);
+                }
+            }
+            
+            // Tüm seçenekleri birleştir ve karıştır
+            const allOptions = [correctIdiom.meaning, ...wrongOptions];
+            shuffleArray(allOptions);
+            
+            return {
+                idiom: correctIdiom.idiom,
+                meaning: correctIdiom.meaning,
+                options: allOptions,
+                correctIndex: allOptions.indexOf(correctIdiom.meaning)
+            };
+        }
+
+        // Dizi karıştırma
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Soruyu göster
+        function displayQuestion() {
+            const question = state.questions[state.currentQuestionIndex];
+            questionText.textContent = `"${question.idiom}" deyiminin anlamı nedir?`;
+            
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            currentQuestion.textContent = `Soru ${state.currentQuestionIndex + 1}/${state.questions.length}`;
+            scoreElement.textContent = `Doğru: ${state.score.correct} | Yanlış: ${state.score.incorrect}`;
+            feedback.textContent = '';
+        }
+
+        // Seçenek seçildiğinde
+        function selectOption(selectedIndex) {
+            const question = state.questions[state.currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            
+            // Tüm seçenekleri devre dışı bırak
+            options.forEach(option => {
+                option.classList.add('disabled');
+            });
+            
+            // Seçilen seçeneği işaretle
+            if (selectedIndex === question.correctIndex) {
+                options[selectedIndex].classList.add('correct');
+                state.score.correct++;
+                feedback.textContent = 'Doğru!';
+                feedback.style.color = '#2ecc71';
+                playCorrectSound();
+                
+                // 0.5 saniye sonra bir sonraki soruya geç
+                setTimeout(() => {
+                    nextQuestion();
+                }, 500);
+            } else {
+                options[selectedIndex].classList.add('incorrect');
+                state.score.incorrect++;
+                feedback.textContent = 'Yanlış!';
+                feedback.style.color = '#e74c3c';
+                playIncorrectSound();
+                
+                // Yanlış cevabı kaydet
+                state.wrongAnswers.push({
+                    question: question.idiom,
+                    correctAnswer: question.meaning,
+                    userAnswer: question.options[selectedIndex]
+                });
+                
+                // 0.5 saniye sonra doğru cevabı mavi renkte göster
+                setTimeout(() => {
+                    options[question.correctIndex].classList.add('show-correct');
+                    
+                    // 0.5 saniye daha sonra bir sonraki soruya geç
+                    setTimeout(() => {
+                        nextQuestion();
+                    }, 500);
+                }, 500);
+            }
+        }
+
+        // Sonraki soru
+        function nextQuestion() {
+            state.currentQuestionIndex++;
+            if (state.currentQuestionIndex < state.questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Sonuçları göster
+        function showResults() {
+            finalScore.textContent = `Set-${state.currentSet} Tamamlandı! Doğru: ${state.score.correct} | Yanlış: ${state.score.incorrect}`;
+            
+            // Yanlış cevapları göster
+            if (state.wrongAnswers.length > 0) {
+                wrongAnswersContainer.innerHTML = `
+                    <h3 class="wrong-title">Yanlış Cevapladığınız Sorular</h3>
+                    ${state.wrongAnswers.map((wrong, index) => `
+                        <div class="wrong-item">
+                            <div class="wrong-question">${index + 1}. "${wrong.question}" deyiminin anlamı nedir?</div>
+                            <div class="wrong-correct">Doğru: ${wrong.correctAnswer}</div>
+                            <div class="wrong-incorrect">Sizin Cevabınız: ${wrong.userAnswer}</div>
+                        </div>
+                    `).join('')}
+                `;
+                wrongAnswersContainer.classList.remove('hidden');
+            } else {
+                wrongAnswersContainer.classList.add('hidden');
+            }
+            
+            showScreen('result');
+        }
+
+        // Yanlışları tekrar sor
+        retryWrongBtn.addEventListener('click', () => {
+            if (state.wrongAnswers.length > 0) {
+                // Yanlış cevaplanan sorulardan yeni bir set oluştur
+                state.questions = state.wrongAnswers.map(wrong => {
+                    const idiom = idioms.find(i => i.idiom === wrong.question);
+                    return createQuestion(idiom);
+                });
+                
+                state.currentQuestionIndex = 0;
+                state.score = { correct: 0, incorrect: 0 };
+                state.wrongAnswers = [];
+                
+                showScreen('quiz');
+                displayQuestion();
+            }
+        });
+
+        // Sonraki set
+        nextSetBtn.addEventListener('click', () => {
+            state.currentSet++;
+            if (state.currentSet > 4) {
+                state.currentSet = 1;
+            }
+            startSet(state.currentSet);
+        });
+
+        // Ekran değiştirme
+        function showScreen(screenName) {
+            mainScreen.classList.remove('active');
+            quizScreen.classList.remove('active');
+            resultScreen.classList.remove('active');
+            
+            if (screenName === 'main') {
+                mainScreen.classList.add('active');
+            } else if (screenName === 'quiz') {
+                quizScreen.classList.add('active');
+            } else if (screenName === 'result') {
+                resultScreen.classList.add('active');
+            }
+            
+            state.currentScreen = screenName;
+        }
+
+        // Uygulamayı başlat
+        function init() {
+            createAlphabetButtons();
+            showScreen('main');
+        }
+
+        // Sayfa yüklendiğinde uygulamayı başlat
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
