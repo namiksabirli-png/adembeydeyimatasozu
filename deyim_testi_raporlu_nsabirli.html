@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Deyim Testi — Set Puanlı & Raporlu</title>
+<style>
+  :root{
+    --bg:#f7f9fb; --card:#fff; --accent:#0b8f6f; --text:#111; --muted:#556; 
+    --ok:#16a34a; --no:#b91c1c; --warn:#b45309;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+  body{background:linear-gradient(180deg,var(--bg),#eef3f4);color:var(--text);display:flex;flex-direction:column}
+  header{padding:20px 16px 10px}
+  h1{margin:0;font-size:20px}
+  .lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px}
+  input[name="student"]{flex:1;min-width:220px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px}
+  .btn{padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;font-size:15px}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .small{padding:8px 12px;border-radius:8px;border:0;background:#e9f3f0;color:var(--accent);font-weight:700;cursor:pointer}
+  #setInfo{padding:8px 16px;color:var(--muted)}
+  main{padding:10px 12px 140px;max-width:980px;margin:0 auto;width:100%}
+  .card{background:var(--card);border-radius:12px;padding:14px;margin:10px 0;box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer}
+  .title{font-weight:800}
+  .hint{color:var(--muted);font-size:13px;margin-top:6px}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:40}
+  .modal{background:#fff;width:92%;max-width:720px;border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+  .modal h2{margin:0 0 8px;font-size:18px}
+  .modal .options{margin-top:12px}
+  .option{padding:10px;margin:8px 0;border-radius:10px;background:#f0f4f3;cursor:pointer;user-select:none}
+  .option:hover{background:#e0eae9}
+  .correct-answer{background:linear-gradient(90deg,#fff59d,#fff176);border:2px solid #fdd835}
+  .wrong-answer{background:#ffcdd2;border:2px solid #ef9a9a}
+  .row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+  .ghost{background:#f8fafc;border:1px solid #e5e7eb;color:#334155}
+  footer{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);display:flex;gap:10px;justify-content:space-between;align-items:center}
+  .score{font-weight:800}
+  .warn{color:var(--warn)}
+  .report{background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin:14px 0}
+  .report h3{margin:0 0 8px;font-size:16px}
+  .report pre{white-space:pre-wrap;word-break:break-word;margin:8px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Deyim Testi — Set Puanlı & Raporlu</h1>
+  <p class="lead">Öğrenci ad-soyadı ile başlayın; her set 10 deyim içerir. Her setin puanı ve sadece “yanlış” yaptıkları raporlanır.</p>
+</header>
+
+<div class="bar">
+  <input id="student" name="student" placeholder="Öğrenci Adı Soyadı" />
+  <button id="startBtn" class="btn">1. Seti Başlat</button>
+  <button id="shuffleBtn" class="small" title="Tüm deyimleri karıştır">Karıştır</button>
+  <button id="finishSetBtn" class="small" title="Bu seti bitir ve raporu oluştur">Seti Bitir & Raporla</button>
+  <span id="liveScore" class="score"></span>
+</div>
+
+<div id="setInfo"></div>
+<main id="list"></main>
+
+<section id="reports" style="max-width:980px;margin:0 auto 120px;padding:0 12px"></section>
+
+<footer>
+  <div>Aktif Set: <strong id="setNo">—</strong></div>
+  <div>
+    <button id="nextSetBtn" class="btn">Sonraki Set</button>
+    <button id="resetBtn" class="small ghost">Sıfırla</button>
+  </div>
+</footer>
+
+<div id="modalRoot" style="display:none"></div>
+
+<script>
+/* ============== VERİ ==============
+  Aşağıdaki küçük örnek çalışır; TAM listeyi kendi dosyanızdan (v2) bu diziye yapıştırabilirsiniz.
+  Yapı: { title: 'DEYİM', meaning: 'ANLAMI' }
+*/
+const ALL_DATA = [
+  { title: 'Aba altından sopa göstermek', meaning: 'Birini üstü kapalı biçimde tehdit etmek. (TDK)' },
+{ title: 'Abesle iştigal etmek', meaning: 'Yararsız, yersiz işlerle uğraşmak. (TDK)' },
+{ title: 'Açığa çıkarmak', meaning: 'Gizli olanı belli eder hâle getirmek, ortaya koymak.' },
+{ title: 'Açık vermek', meaning: 'Sırrını belli etmek, kendini ele vermek.' },
+{ title: 'Açlık beynine vurmak', meaning: 'Çok açlıktan doğru düşünemez hâle gelmek.' },
+{ title: 'Adım atmak', meaning: 'Bir işe girişmek, harekete geçmek.' },
+{ title: 'Adını anmak', meaning: 'Bir kimsenin veya şeyin adını söylemek.' },
+{ title: 'Adını vermek', meaning: 'Adını bildirmek, tanıtmak.' },
+{ title: 'Ağır başlı', meaning: 'Ciddi, ölçülü, olgun davranan. (TDK)' },
+{ title: 'Ağır yara almak', meaning: 'Büyük zarar görmek, sarsılmak.' },
+{ title: 'Ağız birliği etmek', meaning: 'Aynı konuda birleşmek, ortak karar vermek. (TDK)' },
+{ title: 'Ağız değiştirmek', meaning: 'Önceki sözünden farklı konuşmak, caymak.' },
+{ title: 'Ağız eğmemek', meaning: 'Yalvarmamak, boyun eğmemek.' },
+{ title: 'Ağzı dili bağlanmak', meaning: 'Heyecan, korku ya da şaşkınlıktan konuşamaz hâle gelmek.' },
+{ title: 'Ağzı kulaklarına varmak', meaning: 'Çok sevinmek. (TDK)' },
+{ title: 'Ağzı sıkı', meaning: 'Sır saklayan, ketum kimse.' },
+{ title: 'Ağzı süt kokmak', meaning: 'Deneyimsiz, çocukça olmak. (TDK)' },
+{ title: 'Ağzı yanmak', meaning: 'Daha önce yaşadığı kötü tecrübe yüzünden çekingen olmak.' },
+{ title: 'Ağzına baktırmak', meaning: 'Sözlerini dikkatle dinletmek.' },
+{ title: 'Ağzına bir parmak bal çalmak', meaning: 'Birini avutmak, oyalanacak bir şey vermek. (TDK)' },
+{ title: 'Ağzına kilit vurmak', meaning: 'Konuşturmamak.' },
+{ title: 'Ağzına sağlık', meaning: 'Güzel, doğru söz söyleyene övgü sözü.' },
+{ title: 'Ağzına tıkmak', meaning: 'Susturmak, karşılık vermesine fırsat vermemek.' },
+{ title: 'Ağzına yakışmak', meaning: 'Söylenen sözün kişiye uygun düşmesi.' },
+{ title: 'Ağzında bakla ıslanmamak', meaning: 'Sır saklayamamak. (TDK)' },
+{ title: 'Ağzında sakız gibi çiğnemek', meaning: 'Bir sözü çok tekrarlamak.' },
+{ title: 'Ağzından bal damlamak', meaning: 'Çok tatlı ve güzel söz söylemek. (TDK)' },
+{ title: 'Ağzından çıkanı kulağı duymamak', meaning: 'Ne söylediğinin farkında olmamak.' },
+{ title: 'Ağzından kaçırmak', meaning: 'Gizli tutması gerekeni istemeden söylemek.' },
+{ title: 'Ağzından yel alsın', meaning: 'Kötü söz söyleyenin o sözü gerçekleşmesin diye söylenen söz. (TDK)' },
+{ title: 'Ağzını açıp gözünü yummak', meaning: 'Ölçüsüzce yemek yemek.' },
+{ title: 'Ağzını bıçak açmamak', meaning: 'Hiç konuşmamak, sessiz kalmak.' },
+{ title: 'Ağzını hayra aç', meaning: 'İyi şeyler söyle, kötü konuşma.' },
+{ title: 'Ağzını kilitlemek', meaning: 'Konuşmasını engellemek.' },
+{ title: 'Ağzını mühürlemek', meaning: 'Susmasını sağlamak, konuşturmamak.' },
+{ title: 'Ağzının içine bakmak', meaning: 'Ne söyleyeceğini merakla beklemek.' },
+{ title: 'Ağzının suyu akmak', meaning: 'Bir şeye çok imrenmek.' },
+{ title: 'Ağzının tadı yerine gelmek', meaning: 'Keyfinin gelmesi, huzur bulmak.' },
+{ title: 'Ahı gitmek vahı kalmak', meaning: 'Gücünü, canlılığını yitirmek.' },
+{ title: 'Akıl almamak', meaning: 'Anlaşılması güç olmak. (TDK)' },
+{ title: 'Akıl danışmak', meaning: 'Bir iş için görüşünü almak.' },
+{ title: 'Akıl hocalığı taslamak', meaning: 'Kendini akıl veren, yol gösteren gibi göstermek.' },
+{ title: 'Akıl vermek', meaning: 'Öğüt, yol göstermek.' },
+{ title: 'Akıldan çıkarmamak', meaning: 'Hep hatırda tutmak.' },
+{ title: 'Akıntıya karşı kürek çekmek', meaning: 'Zorluğa karşı boş yere uğraşmak.' },
+{ title: 'Akla karayı seçmek', meaning: 'Çok sıkıntı çekmek.' },
+{ title: 'Aklı almamak', meaning: 'Kavrayamamak.' },
+{ title: 'Aklı başından gitmek', meaning: 'Şaşkınlığa kapılmak, hayran olmak.' },
+{ title: 'Aklı beş karış yukarıda olmak', meaning: 'Dalgın, hayalci olmak.' },
+{ title: 'Aklı çıkmak', meaning: 'Çok korkmak.' },
+{ title: 'Aklı ermek', meaning: 'Anlayabilecek durumda olmak.' },
+{ title: 'Aklı yatmak', meaning: 'Uygun, mantıklı bulmak.' },
+{ title: 'Aklına düşmek', meaning: 'Bir şeyin akla gelmesi.' },
+{ title: 'Aklına eseni yapmak', meaning: 'Düşündüğünü hemen uygulamak.' },
+{ title: 'Aklına esmek', meaning: 'Bir düşüncenin ansızın akla gelmesi.' },
+{ title: 'Aklına gelen başına gelmek', meaning: 'Korktuğu şeyin gerçekleşmesi.' },
+{ title: 'Aklına koymak', meaning: 'Kesin olarak karar vermek.' },
+{ title: 'Aklına yatmak', meaning: 'Doğru bulmak, uygun görmek.' },
+{ title: 'Aklından çıkarmamak', meaning: 'Hep düşünmek, unutmamak.' },
+{ title: 'Aklını başka yere vermek', meaning: 'Dalgın olmak.' },
+{ title: 'Aklını bozmak', meaning: 'Dengesizleşmek, akıl sağlığını yitirmek.' },
+{ title: 'Aklını peynir ekmekle yemek', meaning: 'Çok akılsızca iş yapmak.' },
+{ title: 'Aklını yormak', meaning: 'Bir şeyi düşünerek zihnini yormak.' },
+{ title: 'Aktif rol oynamak', meaning: 'Bir işte etkin biçimde yer almak.' },
+{ title: 'Aldırış etmemek', meaning: 'Önem vermemek.' },
+{ title: 'Alın teri dökmek', meaning: 'Çok çalışmak.' },
+{ title: 'Alnı açık olmak', meaning: 'Yüz kızartacak durumu olmamak.' },
+{ title: 'Alnı açık yüzü ak', meaning: 'Temiz geçmişi olmak, başı dik olmak.' },
+{ title: 'Alt perdeden konuşmak', meaning: 'Daha sakin, alçakgönüllü konuşmak.' },
+{ title: 'Altını çizmek', meaning: 'Bir şeyin önemini vurgulamak.' },
+{ title: 'Araları açılmak', meaning: 'İlişkileri bozulmak.' },
+{ title: 'Aralarından kara kedi geçmek', meaning: 'Araya soğukluk girmek.' },
+{ title: 'Ardı arası kesilmemek', meaning: 'Sürekli devam etmek.' },
+{ title: 'Ardı arkası gelmemek', meaning: 'Bitip tükenmemek.' },
+{ title: 'Arka çıkmak', meaning: 'Destek olmak, savunmak.' },
+{ title: 'Arpacı kumrusu gibi düşünmek', meaning: 'Uzun süre dalgın ve düşünceli kalmak.' },
+{ title: 'Astığı astık kestiği kestik', meaning: 'Buyruklarını zorla kabul ettiren, sert kimse.' },
+{ title: 'At çalındıktan sonra ahırın kapısını kapamak', meaning: 'İş işten geçtikten sonra tedbir almak.' },
+{ title: 'At izi it izine karışmak', meaning: 'Her şeyin birbirine karışması, düzenin bozulması.' },
+{ title: 'Ateş bacayı sarmak', meaning: 'Tehlike veya dedikodunun büyümesi.' },
+{ title: 'Ateş pahası', meaning: 'Aşırı derecede pahalı.' },
+{ title: 'Ateş püskürmek', meaning: 'Çok öfkelenmek.' },
+{ title: 'Ateşle oynamak', meaning: 'Tehlikeli iş yapmak.' },
+{ title: 'Atı alan Üsküdar’ı geçmek', meaning: 'İşin artık bitmiş olması, geri alınamaması.' },
+{ title: 'Atını sağlam kazığa bağlamak', meaning: 'İşini garantiye almak.' },
+{ title: 'Attan inip eşeğe binmek', meaning: 'Daha iyiden daha kötüye düşmek.' },
+{ title: 'Avucunun içi gibi bilmek', meaning: 'Çok iyi bilmek.' },
+{ title: 'Avucunun içinde tutmak', meaning: 'Birini tam denetim altında bulundurmak.' },
+{ title: 'Avucunun içine almak', meaning: 'Etkisi altına almak.' },
+{ title: 'Ayağına çelme takmak', meaning: 'Engel olmak, zarar vermek.' },
+{ title: 'Ayağını sürümek', meaning: 'İsteksizce ağır davranmak.' },
+{ title: 'Ayağının tozuyla', meaning: 'Hiç vakit kaybetmeden gelir gelmez.' },
+{ title: 'Ayak diremek', meaning: 'İnat etmek, direnmek.' },
+{ title: 'Ayak uydurmak', meaning: 'Uyum sağlamak.' },
+{ title: 'Ayakları birbirine dolaşmak', meaning: 'Dengesini kaybetmek, bocalamak.' },
+{ title: 'Ayakları geri geri gitmek', meaning: 'İstemeye istemeye gitmek.' },
+{ title: 'Ayakları üstünde durmak', meaning: 'Kendi geçimini sağlamak, bağımsız olmak.' },
+{ title: 'Ayakları yere değmemek', meaning: 'Aşırı sevinmekten havalara uçmak.' },
+{ title: 'Ayaklarına kara su inmek', meaning: 'Çok yorulmak.' },
+{ title: 'Ayaklarına kara sular inmek', meaning: 'Çok yorulmak.' },
+{ title: 'Ayakta kalmak', meaning: 'Zor durumda da olsa direnmek, yenilmemek.' },
+{ title: 'Ayakta tutmak', meaning: 'Birini veya bir işi sürdürmek, desteklemek.' },
+{ title: 'Ayakta uyumak', meaning: 'Çok dalgın olmak ya da uykusuzluktan kendini bilmez hâle gelmek.' },
+{ title: 'Ayarını bozmak', meaning: 'Düzenini, dengesini bozmak.' },
+{ title: 'Ayıkla pirincin taşını', meaning: 'Çözülmesi güç, zahmetli iş.' },
+{ title: 'Ayıyı vurmadan postunu satmak', meaning: 'Sonucu belirsiz iş için önceden hesap yapmak.' },
+{ title: 'Aynı kefeye koymak', meaning: 'Aralarında fark gözetmemek.' },
+{ title: 'Aynı telden çalmak', meaning: 'Aynı düşüncede olmak.' },
+{ title: 'Ayrıcalık tanımak', meaning: 'Özel hak vermek.' },
+{ title: 'Ayvayı yemek', meaning: 'Kötü duruma düşmek.' },
+{ title: 'Ayyuka çıkmak', meaning: 'Herkesçe duyulmak, çok yayılmak.' },
+{ title: 'Bağrına taş basmak', meaning: 'Acıya, kedere katlanmak.' },
+{ title: 'Bahane aramak', meaning: 'Uygun olmayan bir şey için gerekçe bulmaya çalışmak.' },
+{ title: 'Bahtı açık', meaning: 'Talihi yaver giden.' },
+{ title: 'Baklayı ağzından çıkarmak', meaning: 'Sakladığını açıklamak.' },
+{ title: 'Bal alacak çiçeği bilmek', meaning: 'İşini bilen, kurnaz olmak.' },
+{ title: 'Bal dök yala', meaning: 'Çok temiz, pırıl pırıl yer.' },
+{ title: 'Bal gibi', meaning: 'Hiç kuşkusuz, apaçık.' },
+{ title: 'Balı dibinden, yağı yüzünden', meaning: 'En iyisini seçmek.' },
+{ title: 'Balıklama atlamak', meaning: 'Bir işe hemen dalmak.' },
+{ title: 'Balta girmemek', meaning: 'Hiç işlenmemiş, bakir (orman vb.).' },
+{ title: 'Baltayı taşa vurmak', meaning: 'Yanlış iş yapmak, başarısız olmak.' },
+{ title: 'Bam teline dokunmak', meaning: 'En hassas noktasına değmek.' },
+{ title: 'Bardağı taşıran son damla olmak', meaning: 'Tahammülü bitiren son olay.' },
+{ title: 'Bardaktan boşanırcasına yağmak', meaning: 'Çok şiddetli yağmur yağmak.' },
+{ title: 'Barut kesilmek', meaning: 'Öfkesinden deliye dönmek.' },
+{ title: 'Bastığı yeri bilmemek', meaning: 'Kendini kaybetmek, sarhoş gibi olmak.' },
+{ title: 'Baş başa kalmak', meaning: 'İki kişinin yalnız kalması.' },
+{ title: 'Baş başa vermek', meaning: 'Birlikte düşünmek, danışmak.' },
+{ title: 'Baş döndürmek', meaning: 'Hayran bırakmak ya da şaşkınlık yaratmak.' },
+{ title: 'Baş etmek', meaning: 'Yenmek, üstesinden gelmek.' },
+{ title: 'Baş üstünde yeri olmak', meaning: 'Çok değer verilen.' },
+{ title: 'Başa çıkamamak', meaning: 'Gücü yetmemek.' },
+{ title: 'Başa çıkmak', meaning: 'Yenmek, üstesinden gelmek.' },
+{ title: 'Başı dönmek', meaning: 'Dengeyi kaybetmek ya da çok etkilenmek.' },
+{ title: 'Başı göğe ermek', meaning: 'Çok sevinmek.' },
+{ title: 'Başı kalabalık olmak', meaning: 'Yanında birçok kişi bulunmak.' },
+{ title: 'Başı kazan gibi olmak', meaning: 'Çok başı ağrımak.' },
+{ title: 'Başına bir hâl gelmek', meaning: 'Kötü bir olayla karşılaşmak.' },
+{ title: 'Başına çorap örmek', meaning: 'Gizlice kötülük hazırlamak.' },
+{ title: 'Başına dert açmak', meaning: 'Sıkıntıya yol açmak.' },
+{ title: 'Başına devlet kuşu konmak', meaning: 'Beklenmedik büyük bir şans elde etmek.' },
+{ title: 'Başına dikilmek', meaning: 'Yanında beklemek, sürekli kontrol etmek.' },
+{ title: 'Başına kakmak', meaning: 'İyiliği yüzüne vurmak.' },
+{ title: 'Başına taç etmek', meaning: 'Çok değer vermek.' },
+{ title: 'Başından aşağı kaynar sular dökülmek', meaning: 'Çok korkmak veya utanmak.' },
+{ title: 'Başından savmak', meaning: 'İlgilenmeyip uzaklaştırmak.' },
+{ title: 'Başını alıp gitmek', meaning: 'Hiç kimseye haber vermeden uzaklaşmak.' },
+{ title: 'Başını kaşımaya vakti olmamak', meaning: 'Çok meşgul olmak.' },
+{ title: 'Başını şişirmek', meaning: 'Çok konuşarak bunaltmak.' },
+{ title: 'Başını taştan taşa vurmak', meaning: 'Çok pişman olmak.' },
+{ title: 'Başının derdine düşmek', meaning: 'Kendi sorunlarıyla uğraşmak.' },
+{ title: 'Başının etini yemek', meaning: 'Sürekli konuşup usandırmak.' },
+{ title: 'Bayram değil seyran değil', meaning: 'Hiç sebep yokken (yapılan şey).' },
+{ title: 'Bayram etmek', meaning: 'Çok sevinmek.' },
+{ title: 'Bel bağlamak', meaning: 'Güvenmek, dayanmak.' },
+{ title: 'Beli bükülmek', meaning: 'Gücü tükenmek, fakir düşmek.' },
+{ title: 'Benzi atmak', meaning: 'Yüzü solmak, korkudan beti benzi uçmak.' },
+{ title: 'Benzi solmak', meaning: 'Rengi atmak, hasta ya da korkmuş görünmek.' },
+{ title: 'Benzi uçmak', meaning: 'Korkudan ya da hastalıktan rengi solmak.' },
+{ title: 'Beyni sulanmak', meaning: 'Düşünemez hâle gelmek, bunamak.' },
+{ title: 'Beyninde şimşekler çakmak', meaning: 'Aniden parlak bir fikir gelmek.' },
+{ title: 'Beyninden vurulmuşa dönmek', meaning: 'Çok sarsılmak, şaşkına dönmek.' },
+{ title: 'Beynini kemirmek', meaning: 'İçini sürekli kurcalayan düşünce.' },
+{ title: 'Bıçak kemiğe dayanmak', meaning: 'Dayanılmaz hâle gelmek.' },
+{ title: 'Bilmece gibi konuşmak', meaning: 'Kapalı, anlaşılmaz sözler söylemek.' },
+{ title: 'Bilmezlikten gelmek', meaning: 'Görmezden, duymazdan gelmek.' },
+{ title: 'Bin dereden su getirmek', meaning: 'Çok bahane ileri sürmek.' },
+{ title: 'Bin tarakta bezi olmak', meaning: 'Her işe karışmak.' },
+{ title: 'Bindiği dalı kesmek', meaning: 'Kendi zararına iş yapmak.' },
+{ title: 'Bir araya gelmek', meaning: 'Toplanmak, görüşmek.' },
+{ title: 'Bir baltaya sap olamamak', meaning: 'Hiçbir işte başarılı olamamak.' },
+{ title: 'Bir bardak soğuk su içmek', meaning: 'Umudunu kesmek.' },
+{ title: 'Bir bardak suda fırtına koparmak', meaning: 'Küçük şeyleri büyütmek.' },
+{ title: 'Bir çatı altında', meaning: 'Aynı yerde, birlikte.' },
+{ title: 'Bir dediği iki olmamak', meaning: 'İstediği hemen yerine getirilmek.' },
+{ title: 'Bir eli yağda bir eli balda olmak', meaning: 'Çok rahat ve zengin yaşamak.' },
+{ title: 'Bir kaşık suda boğmak', meaning: 'Küçücük şeye büyük tepki göstermek.' },
+{ title: 'Bir kulağından girip öbüründen çıkmak', meaning: 'Duyduğunu önemsememek.' },
+{ title: 'Bir kuşsütü eksik', meaning: 'Eksiksiz, her şey tam.' },
+{ title: 'Bir taşla iki kuş vurmak', meaning: 'Tek çabayla iki iş başarmak.' },
+{ title: 'Bir yaşına daha girmek', meaning: 'Yeni bir şey öğrenmek, şaşırmak.' },
+{ title: 'Bire beş katmak', meaning: 'Az şeyi çok yapmak.' },
+{ title: 'Bire bin katmak', meaning: 'Azı çok göstermek, abartmak.' },
+{ title: 'Bitmek tükenmek bilmemek', meaning: 'Sonu gelmemek.' },
+{ title: 'Boğazına durmak', meaning: 'Yutkunamamak ya da karnı doymak.' },
+{ title: 'Boğazında düğümlenmek', meaning: 'Ağlamaktan ya da duygudan konuşamamak.' },
+{ title: 'Borç içinde yüzmek', meaning: 'Çok borçlu olmak.' },
+{ title: 'Boş durmamak', meaning: 'Sürekli meşgul olmak.' },
+{ title: 'Boy göstermek', meaning: 'Ortaya çıkmak, görünmek.' },
+{ title: 'Boy ölçüşmek', meaning: 'Yarışmak, karşı koymak.' },
+{ title: 'Boynu armut sapına dönmek', meaning: 'Zayıflıktan boynu incelmek.' },
+{ title: 'Boynunu bükmek', meaning: 'Boyun eğmek, çaresiz kalmak.' },
+{ title: 'Boyun eğmek', meaning: 'Teslim olmak, karşı gelmemek.' },
+{ title: 'Boyunu görmek', meaning: 'Gücünün sınırını bilmek.' },
+{ title: 'Boyunun ölçüsünü almak', meaning: 'Deneyip başarısız olmak.' },
+{ title: 'Buhar olmak', meaning: 'Kaybolmak.' },
+{ title: 'Bulanık suda balık avlamak', meaning: 'Karışıklıktan çıkar sağlamak.' },
+{ title: 'Buluttan nem kapmak', meaning: 'Küçük şeye büyük tepki vermek.' },
+{ title: 'Burnu büyümek', meaning: 'Kendini beğenmek, kibirlenmek.' },
+{ title: 'Burnu çenesine değmek', meaning: 'Çok zayıf ve güçsüz olmak.' },
+{ title: 'Burnu Kafdağı’nda olmak', meaning: 'Kibirlenmek, gururlanmak.' },
+{ title: 'Burnu yere düşse almaz', meaning: 'Çok gururlu ve kibirli kimse.' },
+{ title: 'Burnuna kötü kokular gelmek', meaning: 'Bir işte terslik, hile sezinlemek.' },
+{ title: 'Burnunda tütmek', meaning: 'Çok özlemek.' },
+{ title: 'Burnundan getirmek', meaning: 'Çektirmek, yaptığının cezasını ağır ödettirmek.' },
+{ title: 'Burnundan kıl aldırmamak', meaning: 'Kendini beğenmiş olmak.' },
+{ title: 'Burnundan solumak', meaning: 'Çok öfkelenmek.' },
+{ title: 'Burnunun dibine sokulmak', meaning: 'Çok yakına gelmek.' },
+{ title: 'Burnunun dibini görmemek', meaning: 'Çok kör veya dalgın olmak.' },
+{ title: 'Burnunun dikine gitmek', meaning: 'Israrla kendi bildiğini yapmak.' },
+{ title: 'Burnunun direği kırılmak', meaning: 'Aşırı soğuktan burnun donacak gibi olması.' },
+{ title: 'Burnunun direği sızlamak', meaning: 'Çok duygulanmak, ağlama isteği gelmek.' },
+{ title: 'Burnunun ucunu görememek', meaning: 'Çok sisli ya da karanlık ortam.' },
+{ title: 'Burun kıvırmak', meaning: 'Beğenmemek, küçümsemek.' },
+{ title: 'Buz kesilmek', meaning: 'Çok üşümek.' },
+{ title: 'Buz kesmek', meaning: 'Donup kalmak, korkudan hareket edememek.' },
+{ title: 'Buz üstüne yazı yazmak', meaning: 'Kalıcı olmayan iş yapmak.' },
+{ title: 'Bülbül gibi konuşmak', meaning: 'Çok güzel konuşmak.' },
+{ title: 'Büyükle büyük, küçükle küçük olmak', meaning: 'Herkesle seviyesine göre davranmak.' },
+{ title: 'Cadı kazanı gibi kaynamak', meaning: 'Çok karışık, gürültülü olmak.' },
+{ title: 'Can atmak', meaning: 'Çok istemek.' },
+{ title: 'Can damarından yakalamak', meaning: 'En hassas yerine dokunmak.' },
+{ title: 'Can kulağıyla dinlemek', meaning: 'Büyük dikkatle dinlemek.' },
+{ title: 'Can sıkmak', meaning: 'Üzüntü veya rahatsızlık vermek.' },
+{ title: 'Cana can katmak', meaning: 'Daha güçlü, canlı hâle getirmek.' },
+{ title: 'Canı ağzına gelmek', meaning: 'Çok yorulmak veya zor durumda kalmak.' },
+{ title: 'Canı burnuna gelmek', meaning: 'Tahammülü kalmamak.' },
+{ title: 'Canı burnundan çıkmak', meaning: 'Çok yorulmak.' },
+{ title: 'Canı çekilmek', meaning: 'Bir şeyi çok istemek.' },
+{ title: 'Canı çıkmak', meaning: 'Çok yorulmak ya da ölmek.' },
+{ title: 'Canı gitmek', meaning: 'Ölmek.' },
+{ title: 'Canı yanmak', meaning: 'Acı çekmek.' },
+{ title: 'Canına okumak', meaning: 'Çok zarar vermek, mahvetmek.' },
+{ title: 'Canına tak etmek', meaning: 'Dayanamamak, bıkmak.' },
+{ title: 'Canını dişine takmak', meaning: 'Büyük çabayla çalışmak.' },
+{ title: 'Canını kurtarmak', meaning: 'Tehlikeden uzaklaşmak.' },
+{ title: 'Canla başla', meaning: 'Tüm gücüyle, gayretle.' },
+{ title: 'Cebi para görmek', meaning: 'Paraya kavuşmak.' },
+{ title: 'Cebinde akrep olmak', meaning: 'Çok cimri olmak.' },
+{ title: 'Cehenneme çevirmek', meaning: 'Çok kötü duruma sokmak.' },
+{ title: 'Cennete çevirmek', meaning: 'Çok güzel, huzurlu hâle getirmek.' },
+{ title: 'Ciğeri beş para etmemek', meaning: 'Değersiz, işe yaramaz kimse.' },
+{ title: 'Cin fikirli', meaning: 'Çok kurnaz, zekice çözümler bulan.' },
+{ title: 'Çaba göstermek', meaning: 'Gayret etmek.' },
+{ title: 'Çağ atlamak', meaning: 'Büyük ilerleme kaydetmek.' },
+{ title: 'Çalım satmak', meaning: 'Gösteriş yapmak, hava atmak.' },
+{ title: 'Çalımından geçilmemek', meaning: 'Çok kibirli olmak.' },
+{ title: 'Çalmadan oynamak', meaning: 'Hakkı olmadan faydalanmak.' },
+{ title: 'Çam devirmek', meaning: 'Uygunsuz, kırıcı söz söylemek.' },
+{ title: 'Çay kenarında kuyu kazmak', meaning: 'Boşuna uğraşmak.' },
+{ title: 'Çekirdekten yetişmek', meaning: 'En baştan itibaren öğrenerek büyümek.' },
+{ title: 'Çene çalmak', meaning: 'Boş konuşmak.' },
+{ title: 'Çene yarıştırmak', meaning: 'Tartışmak, münakaşa etmek.' },
+{ title: 'Çenesi durmamak', meaning: 'Çok konuşmak.' },
+{ title: 'Çenesi düşmek', meaning: 'Çok konuşmak.' },
+{ title: 'Çenesini bıçak açmamak', meaning: 'Hiç konuşmamak.' },
+{ title: 'Çenesini tutmak', meaning: 'Susmak, konuşmamak.' },
+{ title: 'Çığır açmak', meaning: 'Yeni yol, yöntem ortaya koymak.' },
+{ title: 'Çıt çıkarmamak', meaning: 'Hiç ses çıkarmamak.' },
+{ title: 'Çile çekmek', meaning: 'Sıkıntı çekmek.' },
+{ title: 'Çileden çıkmak', meaning: 'Çok sinirlenmek.' },
+{ title: 'Çivisi çıkmak', meaning: 'Düzenin bozulması.' },
+{ title: 'Çizgisinden sapmamak', meaning: 'Tavrını, prensibini değiştirmemek.' },
+{ title: 'Çizmeden yukarı çıkmamak', meaning: 'Haddini bilmek.' },
+{ title: 'Çoban kulübesinde padişah rüyası görmek', meaning: 'Olmayacak şeyleri hayal etmek.' },
+{ title: 'Çocuk avutmak', meaning: 'Oyalamak için boş söz söylemek.' },
+{ title: 'Çocuk oyuncağı', meaning: 'Çok kolay iş.' },
+{ title: 'Çorbada tuzu bulunmak', meaning: 'Bir işe az da olsa katkısı olmak.' },
+{ title: 'Çorbaya sinek düşmek', meaning: 'İyi giden işin içine tatsızlık karışması.' },
+{ title: 'Çuvalla para kazanmak', meaning: 'Çok para kazanmak.' },
+{ title: 'Çürük tahtaya basmak', meaning: 'Güvenilmez iş yapmak.' },
+{ title: 'Dağlara düşmek', meaning: 'Çok perişan olmak, çaresiz kalmak.' },
+{ title: 'Dağları devirmek', meaning: 'Çok büyük işler başarmak.' },
+{ title: 'Dakikası dakikasına uymamak', meaning: 'Sürekli kararsızlık, değişkenlik göstermek.' },
+{ title: 'Dal gibi kalmak', meaning: 'Çok zayıf olmak.' },
+{ title: 'Dalıp gitmek', meaning: 'Düşüncelere dalmak.' },
+{ title: 'Damarı tutmak', meaning: 'En uygun noktayı yakalamak.' },
+{ title: 'Damarına basmak', meaning: 'Sinirlendirmek.' },
+{ title: 'Damga vurmak', meaning: 'Etkisini bırakmak.' },
+{ title: 'Dananın kuyruğu kopmak', meaning: 'İşin en kritik anına gelmek.' },
+{ title: 'Darda kalmak', meaning: 'Sıkıntıya düşmek.' },
+{ title: 'Dediğim dedik', meaning: 'İnatçı, dediğini uygulayan.' },
+{ title: 'Defterden silmek', meaning: 'Artık ilişkiyi kesmek.' },
+{ title: 'Defteri kapatmak', meaning: 'Bir işi bitirmek.' },
+{ title: 'Defterini dürmek', meaning: 'Öldürmek, işini bitirmek.' },
+{ title: 'Demir atmak', meaning: 'Bir yere yerleşmek.' },
+{ title: 'Denizdeki balığın karada komisyonunu yapmak', meaning: 'Elinde olmayan şey için hesap yapmak.' },
+{ title: 'Dereyi görmeden paçaları sıvamak', meaning: 'İş bitmeden sonuç beklemek.' },
+{ title: 'Ders vermek', meaning: 'Öğretici olay yaşatmak.' },
+{ title: 'Desteksiz atmak', meaning: 'Yalan söylemek.' },
+{ title: 'Deve kuşu gibi başını kuma sokmak', meaning: 'Gerçeklerden kaçmak.' },
+{ title: 'Devede kulak kalmak', meaning: 'Çok az, önemsiz.' },
+{ title: 'Dışı seni yakar, içi beni', meaning: 'Görünüşü güzel ama içi sıkıntılı durum.' },
+{ title: 'Dikiş tutturamamak', meaning: 'Hiçbir işte başarılı olamamak.' },
+{ title: 'Dikkat kesilmek', meaning: 'Dikkatini yoğunlaştırmak.' },
+{ title: 'Dil dökmek', meaning: 'İkna etmeye çalışmak.' },
+{ title: 'Dile gelmek', meaning: 'Sözle anlatılır hâle gelmek.' },
+{ title: 'Dile getirmek', meaning: 'Söylemek.' },
+{ title: 'Dili dolaşmak', meaning: 'Telaş veya yorgunluktan doğru konuşamamak.' },
+{ title: 'Dili durmamak', meaning: 'Sürekli konuşmak.' },
+{ title: 'Dili tutulmak', meaning: 'Konuşamaz hâle gelmek.' },
+{ title: 'Dili uzun', meaning: 'Saygısızca konuşan, arsız.' },
+{ title: 'Dili varmamak', meaning: 'Söylemeye gönlü razı olmamak.' },
+{ title: 'Dilinde tüy bitmek', meaning: 'Aynı şeyi defalarca söylemek.' },
+{ title: 'Dilinden kurtulamamak', meaning: 'Sürekli eleştirilmek, laf işitmek.' },
+{ title: 'Diline dolamak', meaning: 'Bir şeyi sürekli söylemek.' },
+{ title: 'Diline pelesenk etmek', meaning: 'Sık sık tekrar etmek.' },
+{ title: 'Dilini kedi mi yedi?', meaning: 'Neden susuyorsun? (sitem ifadesi).' },
+{ title: 'Dilini tutmak', meaning: 'Konuşmaktan kaçınmak.' },
+{ title: 'Dilinin altında bir şey olmak', meaning: 'Söylemek isteyip de saklamak.' },
+{ title: 'Dillerde dolaşmak', meaning: 'Herkes tarafından söylenek.' },
+{ title: 'Dimyat’a pirince giderken evdeki bulgurdan olmak', meaning: 'Daha iyisini isterken elindekinden olmak.' },
+{ title: 'Dirsek çevirmek', meaning: 'Yakınken ilgiyi kesmek.' },
+{ title: 'Dirsek çürütmek', meaning: 'Çok çalışmak.' },
+{ title: 'Diş bilemek', meaning: 'Öç almak için kin beslemek.' },
+{ title: 'Dişe dokunmak', meaning: 'Küçük de olsa değerli olmak.' },
+{ title: 'Dişini sıkmak', meaning: 'Zorluğa sabretmek.' },
+{ title: 'Dizini dövmek', meaning: 'Pişman olmak.' },
+{ title: 'Dizlerine kara sular inmek', meaning: 'Çok yorulmak.' },
+{ title: 'Dizlerinin bağı çözülmek', meaning: 'Çok korkmak veya heyecanlanmak.' },
+{ title: 'Dobra dobra konuşmak', meaning: 'Açık sözlü davranmak.' },
+{ title: 'Dostlar alışverişte görsün', meaning: 'Gösteriş için iş yapmak.' },
+{ title: 'Dozunu kaçırmak', meaning: 'Ölçüsünü aşmak.' },
+{ title: 'Dört ayak üstüne düşmek', meaning: 'Şanslı olmak.' },
+{ title: 'Dört elle sarılmak', meaning: 'Büyük gayret göstermek.' },
+{ title: 'Dört gözle beklemek', meaning: 'Çok sabırsızlanmak.' },
+{ title: 'Dörtköşe olmak', meaning: 'Çok sevinmek.' },
+{ title: 'Dudak bükmek', meaning: 'Beğenmemek.' },
+{ title: 'Dudak büzmek', meaning: 'Somurtmak.' },
+{ title: 'Dudak ısırmak', meaning: 'Utanmak veya pişman olmak.' },
+{ title: 'Dudak sarkıtmak', meaning: 'Somurtmak.' },
+{ title: 'Duman olmak', meaning: 'Kaybolmak.' },
+{ title: 'Dumanı tepesinden çıkmak', meaning: 'Öfkelenmek.' },
+{ title: 'Dumura uğramak', meaning: 'İşlevsiz hâle gelmek.' },
+{ title: 'Dut yemiş bülbüle dönmek', meaning: 'Susmak, sessizleşmek.' },
+{ title: 'Düğün bayram etmek', meaning: 'Çok sevinmek.' },
+{ title: 'Dümen kırmak', meaning: 'Yön değiştirmek.' },
+{ title: 'Dümen suyundan gitmek', meaning: 'Başkasını taklit etmek.' },
+{ title: 'Dünya başına yıkılmak', meaning: 'Büyük üzüntü yaşamak.' },
+{ title: 'Dünya gözü ile görmek', meaning: 'Hayattayken görmek.' },
+{ title: 'Dünya yıkılsa umurunda olmamak', meaning: 'Hiç önemsememek.' },
+{ title: 'Dünyadan elini eteğini çekmek', meaning: 'Hayattan uzaklaşmak.' },
+{ title: 'Dünyadan haberi olmamak', meaning: 'Çevresindekileri bilmemek.' },
+{ title: 'Dünyalar onun olmak', meaning: 'Çok sevinmek.' },
+{ title: 'Dünyalara değişmemek', meaning: 'Çok değer vermek.' },
+{ title: 'Dünyayı gözü görmemek', meaning: 'Hiçbir şeyi önemsememek.' },
+{ title: 'Dünyayı tozpembe görmek', meaning: 'Gerçekleri iyimser görmek.' },
+{ title: 'Dürbünün tersiyle bakmak', meaning: 'Yanlış değerlendirmek.' },
+{ title: 'Düş kırıklığına uğramak', meaning: 'Hayal kırıklığı yaşamak.' },
+{ title: 'Düzen kurmak', meaning: 'Sistem oluşturmak.' },
+{ title: 'Ecel terleri dökmek', meaning: 'Ölüm korkusu yaşamak.' },
+{ title: 'Ekmeğine göz koymak', meaning: 'Başkasının kazancına göz dikmek.' },
+{ title: 'Ekmeğine yağ sürmek', meaning: 'İşini kolaylaştırmak.' },
+{ title: 'Ekmeğini eline almak', meaning: 'Kendi kazancını sağlamaya başlamak.' },
+{ title: 'Ekmeğini kazanmak', meaning: 'Geçimini sağlamak.' },
+{ title: 'Ekmeğini taştan çıkarmak', meaning: 'Çok zor şartlarda geçimini sağlamak.' },
+{ title: 'Ekmeğini yemek', meaning: 'Bir şeyden yararlanmak.' },
+{ title: 'Ekmeğiyle oynamak', meaning: 'Geçim kaynağını elinden almak.' },
+{ title: 'Ekmek elden su gölden', meaning: 'Hiç çalışmadan geçinmek.' },
+{ title: 'Ektiğini biçmek', meaning: 'Ne yaptıysa karşılığını görmek.' },
+{ title: 'El açmak', meaning: 'Yardım istemek.' },
+{ title: 'El birliğiyle', meaning: 'Birlikte, ortaklaşa.' },
+{ title: 'El ele vermek', meaning: 'Birlikte çalışmak.' },
+{ title: 'El etek öpmek', meaning: 'Rica için yalvarmak.' },
+{ title: 'El kazanıyla aş kaynatmak', meaning: 'Başkasının malını kullanmak.' },
+{ title: 'El konulmak', meaning: 'Elinden alınmak.' },
+{ title: 'Elbirliği etmek', meaning: 'Ortak çalışmak.' },
+{ title: 'Elden çıkarmak', meaning: 'Satmak, kaybetmek.' },
+{ title: 'Elden gitmek', meaning: 'Kaybolmak.' },
+{ title: 'Ele avuca sığmamak', meaning: 'Çok hareketli olmak.' },
+{ title: 'Ele geçirmek', meaning: 'Sahip olmak.' },
+{ title: 'Eli açık', meaning: 'Cömert.' },
+{ title: 'Eli ağır', meaning: 'İşini yavaş yapan.' },
+{ title: 'Eli ayağı buz kesmek', meaning: 'Çok üşümek veya korkmak.' },
+{ title: 'Eli ayağı titremek', meaning: 'Heyecanlanmak veya korkmak.' },
+{ title: 'Eli ayağına dolaşmak', meaning: 'Telaşa düşmek.' },
+{ title: 'Eli bol', meaning: 'Cömert.' },
+{ title: 'Eli cebine gitmemek', meaning: 'Cimri olmak.' },
+{ title: 'Eli cüzdanına gitmemek', meaning: 'Harcamaktan kaçınmak.' },
+{ title: 'Eli darda', meaning: 'Parasız olmak.' },
+{ title: 'Eli ekmek tutmak', meaning: 'Geçimini sağlayabilmek.' },
+{ title: 'Eli kolu bağlanmak', meaning: 'Çaresiz kalmak.' },
+{ title: 'Eli sıkı', meaning: 'Cimri.' },
+{ title: 'Eli şakaklarında düşünmek', meaning: 'Derin düşünmek.' },
+{ title: 'Elin ağzıyla kuş tutmak', meaning: 'Çok zor iş başarmak.' },
+{ title: 'Elinde büyümek', meaning: 'Onun yanında yetişmek.' },
+{ title: 'Elinde kalmak', meaning: 'Bozulmak veya satılamamak.' },
+{ title: 'Elinden geleni ardına bırakmamak', meaning: 'İntikam almak için her şeyi yapmak.' },
+{ title: 'Elinden geleni yapmak', meaning: 'Gayret göstermek.' },
+{ title: 'Elinden hiçbir şey kurtulmamak', meaning: 'Çok güçlü veya becerikli olmak.' },
+{ title: 'Elinden iyi iş gelmek', meaning: 'Ustalıkla iş yapmak.' },
+{ title: 'Eline düşmek', meaning: 'Yardımına muhtaç hâle gelmek.' },
+{ title: 'Eline eteğine sarılmak', meaning: 'Yalvarmak.' },
+{ title: 'Eline tutuşturmak', meaning: 'Bir şey vermek.' },
+{ title: 'Elini ayağını çekmek', meaning: 'İlgilenmeyi bırakmak.' },
+{ title: 'Elini çabuk tutmak', meaning: 'Hızlı davranmak.' },
+{ title: 'Elini sıcak sudan soğuk suya sokmamak', meaning: 'Hiç iş yapmamak.' },
+{ title: 'Elini taşın altına koymak', meaning: 'Sorumluluk üstlenmek.' },
+{ title: 'Emeği geçmek', meaning: 'Katkıda bulunmak.' },
+{ title: 'Emek vermek', meaning: 'Çaba göstermek.' },
+{ title: 'Engel çıkarmak', meaning: 'Zorluk oluşturmak.' },
+{ title: 'Ense yapmak', meaning: 'Rahat yaşamak.' },
+{ title: 'Ensesinde boza pişirmek', meaning: 'Sürekli baskı yapmak.' },
+{ title: 'Enseyi karartmak', meaning: 'Umutsuzluğa düşmek.' },
+{ title: 'Es geçmek', meaning: 'Dikkate almamak.' },
+{ title: 'Eski çamlar bardak olmak', meaning: 'Çok zaman geçmek, eski önemini yitirmek.' },
+{ title: 'Eski köye yeni âdet getirmek', meaning: 'Yerleşmiş düzene aykırı yenilik getirmek.' },
+{ title: 'Eski kulağı kesiklerden olmak', meaning: 'Tecrübeli olmak.' },
+{ title: 'Eşekten düşmüş karpuza dönmek', meaning: 'Şaşkın bir hâle gelmek.' },
+{ title: 'Et tırnak olmak', meaning: 'Çok yakın, ayrılmaz olmak.' },
+{ title: 'Etekleri tutuşmak', meaning: 'Telaşa düşmek.' },
+{ title: 'Etekleri zil çalmak', meaning: 'Çok sevinmek.' },
+{ title: 'Etle tırnak gibi olmak', meaning: 'Çok sıkı dost olmak.' },
+{ title: 'Etliye sütlüye karışmamak', meaning: 'Tarafsız kalmak.' },
+{ title: 'Etrafını sarmak', meaning: 'Çevresini kuşatmak.' },
+{ title: 'Etten duvar örmek', meaning: 'İnsanlarla engel oluşturmak.' },
+{ title: 'Ezber bozmak', meaning: 'Alışılmışın dışında iş yapmak.' },
+{ title: 'Fark etmek', meaning: 'Görmek, anlamak.' },
+{ title: 'Farkına varmak', meaning: 'Anlamak, idrak etmek.' },
+{ title: 'Feleğin çemberinden geçmek', meaning: 'Çok şey görüp yaşamış olmak.' },
+{ title: 'Felsefe yapmak', meaning: 'Gereksiz, ayrıntılı konuşmak.' },
+{ title: 'Fırsat bulmak', meaning: 'Uygun zamanı yakalamak.' },
+{ title: 'Fırtına atlatmak', meaning: 'Büyük zorluk yaşamak.' },
+{ title: 'Fikir almak', meaning: 'Başkasının görüşünü öğrenmek.' },
+{ title: 'Fikir vermek', meaning: 'Yol göstermek.' },
+{ title: 'Fikir yürütmek', meaning: 'Düşünce geliştirmek.' },
+{ title: 'Fil dişi kuleden bakmak', meaning: 'Hayattan kopuk davranmak.' },
+{ title: 'Film oynatmak', meaning: 'Gözünde sahne canlanması.' },
+{ title: 'Forsunu yitirmek', meaning: 'Nüfuzunu kaybetmek.' },
+{ title: 'Gani gönüllü', meaning: 'Cömert.' },
+{ title: 'Gayrete gelmek', meaning: 'Çalışmaya heveslenmek.' },
+{ title: 'Geceyi gündüze katmak', meaning: 'Sürekli çalışmak.' },
+{ title: 'Gel zaman git zaman', meaning: 'Masallarda zaman geçişi ifadesi.' },
+{ title: 'Geniş gönüllü olmak', meaning: 'Hoşgörülü olmak.' },
+{ title: 'Geride bırakmak', meaning: 'Arkasında bırakmak.' },
+{ title: 'Gezip tozmak', meaning: 'Dolaşmak, eğlenmek.' },
+{ title: 'Gıcık olmak', meaning: 'Birinden hoşlanmamak.' },
+{ title: 'Gına gelmek', meaning: 'Bıkmak, usanmak.' },
+{ title: 'Göbeği çatlamak', meaning: 'Çok zorlanmak.' },
+{ title: 'Göbeğini kendisi kesmek', meaning: 'Kendi işini kendisi yapmak.' },
+{ title: 'Göbek bağlamak', meaning: 'Çok bağlanmak.' },
+{ title: 'Göğe merdinen dayamak', meaning: 'Çok zor iş yapmak.' },
+{ title: 'Göklere çıkarmak', meaning: 'Aşırı övmek.' },
+{ title: 'Göklere uçmak', meaning: 'Çok sevinmek.' },
+{ title: 'Gönlü kalmak', meaning: 'İçinde isteği olmak.' },
+{ title: 'Gönlü razı olmamak', meaning: 'Kabul etmemek.' },
+{ title: 'Gönlü tutuşmak', meaning: 'Aşkla yanmak.' },
+{ title: 'Gönlünden kopmak', meaning: 'İsteyerek vermek.' },
+{ title: 'Gönlünü kaptırmak', meaning: 'Âşık olmak.' },
+{ title: 'Gönül vermek', meaning: 'Sevmek.' },
+{ title: 'Göz açtırmamak', meaning: 'Hiç fırsat vermemek.' },
+{ title: 'Göz alabildiğine', meaning: 'Uzaklara kadar.' },
+{ title: 'Göz atmak', meaning: 'Kısaca bakmak.' },
+{ title: 'Göz boyamak', meaning: 'Aldatıcı görünüm vermek.' },
+{ title: 'Göz gezdirmek', meaning: 'Hızla bakmak.' },
+{ title: 'Göz kırpmak', meaning: 'Uyumamak; gözle işaret yapmak.' },
+{ title: 'Göz kulak olmak', meaning: 'Gözetmek, ilgilenmek.' },
+{ title: 'Göz önünde bulundurmak', meaning: 'Dikkate almak.' },
+{ title: 'Göz yummak', meaning: 'Görmezden gelmek.' },
+{ title: 'Gözdağı vermek', meaning: 'Tehdit etmek.' },
+{ title: 'Gözden çıkarmak', meaning: 'Feda etmek.' },
+{ title: 'Gözden düşmek', meaning: 'Değerini kaybetmek.' },
+{ title: 'Gözden geçirmek', meaning: 'Yeniden incelemek.' },
+{ title: 'Göze almak', meaning: 'Risk üstlenmek.' },
+{ title: 'Göze batmak', meaning: 'Rahatsızlık verecek biçimde dikkat çekmek.' },
+{ title: 'Göze çarpmak', meaning: 'Görülmek, fark edilmek.' },
+{ title: 'Göze girmek', meaning: 'Beğenilmek.' },
+{ title: 'Gözleri çakmak çakmak olmak', meaning: 'Parlak bakışlara sahip olmak.' },
+{ title: 'Gözleri çivilenmek', meaning: 'Gözünü ayıramamak.' },
+{ title: 'Gözleri ışımak', meaning: 'Mutluluktan gözleri parlamak.' },
+{ title: 'Gözleri kan çanağına dönmek', meaning: 'Çok yorgun veya ağlamış olmak.' },
+{ title: 'Gözleri kararmak', meaning: 'Aniden görmemek, bayılacak gibi olmak.' },
+{ title: 'Gözleri parıldamak', meaning: 'Sevinçten gözlerinin ışıldaması.' },
+{ title: 'Gözleri takılıp kalmak', meaning: 'Bir şeye dalıp bakmak.' },
+{ title: 'Gözleri yaşarmak', meaning: 'Duygulanmak veya ağlamak.' },
+{ title: 'Gözleri yollarda kalmak', meaning: 'Sabırsızlıkla beklemek.' },
+{ title: 'Gözlerinde şimşekler çakmak', meaning: 'Çok sinirlenmek.' },
+{ title: 'Gözlerine inanamamak', meaning: 'Çok şaşırmak.' },
+{ title: 'Gözlerini açmak', meaning: 'Farkına varmak.' },
+{ title: 'Gözlerini dört açmak', meaning: 'Çok dikkatli olmak.' },
+{ title: 'Gözlerini fal taşı gibi açmak', meaning: 'Çok şaşırmak.' },
+{ title: 'Gözlerini yummamak', meaning: 'Hiç uyumamak.' },
+{ title: 'Gözü aç', meaning: 'Doymak bilmez.' },
+{ title: 'Gözü açık', meaning: 'Uyanık, dikkatli.' },
+{ title: 'Gözü arkada kalmak', meaning: 'Endişe etmek.' },
+{ title: 'Gözü gibi sevmek', meaning: 'Çok sevmek.' },
+{ title: 'Gözü ısırmak', meaning: 'Daha önce gördüğünü hatırlamak.' },
+{ title: 'Gözü kapalı', meaning: 'Düşünmeden kabul etmek.' },
+{ title: 'Gözü kara', meaning: 'Gözü pek, cesur.' },
+{ title: 'Gözü kesmek', meaning: 'Bir şeyi yapabileceğine inanmak.' },
+{ title: 'Gözü korkmak', meaning: 'Korkuya kapılmak.' },
+{ title: 'Gözü sulu', meaning: 'Kolay ağlayan.' },
+{ title: 'Gözü takılmak', meaning: 'Gözü ilişmek.' },
+{ title: 'Gözü yollarda kalmak', meaning: 'Beklemek.' },
+{ title: 'Gözünde büyütmek', meaning: 'Gereğinden fazla önemli görmek.' },
+{ title: 'Gözünden kaçmak', meaning: 'Fark etmemek.' },
+{ title: 'Gözünü ayırmamak', meaning: 'Devamlı bakmak.' },
+{ title: 'Gözünü boyamak', meaning: 'Aldatıcı görünüm sunmak.' },
+{ title: 'Gözünü daldan budaktan sakınmamak', meaning: 'Hiçbir şeyden korkmamak.' },
+{ title: 'Gözünü karartmak', meaning: 'Her şeyi göze almak.' },
+{ title: 'Gözünü dört açmak', meaning: 'Çok dikkatli davranmak.' },
+{ title: 'Gözünün içine bakmak', meaning: 'Onu üzmemek için her dediğini yapmak.' },
+{ title: 'Gül gibi geçinmek', meaning: 'Sorunsuz, huzurlu yaşamak.' },
+{ title: 'Gün ışığına çıkmak', meaning: 'Gizli bir şeyin açığa çıkması.' },
+{ title: 'Gün ola harman ola', meaning: 'Vaktin neler getireceğini zamanla görürüz.' },
+{ title: 'Günahını vermemek', meaning: 'Çok güvensiz biri olarak görmek.' },
+{ title: 'Güvendiği dağlara kar yağmak', meaning: 'Güvendiği yerden hayal kırıklığına uğramak.' },
+{ title: 'Haber uçurmak', meaning: 'Gizlice haber vermek.' },
+{ title: 'Haddini bilmek', meaning: 'Sınırını, yerini bilmek.' },
+{ title: 'Hafif atlatmak', meaning: 'Bir olayı küçük zararla geçirmek.' },
+{ title: 'Hafife almak', meaning: 'Önemsememek.' },
+{ title: 'Hakkından gelmek', meaning: 'Yenmek, alt etmek.' },
+{ title: 'Halı altına süpürmek', meaning: 'Görmezden gelmek.' },
+{ title: 'Hangi dağda kurt öldü', meaning: 'Beklenmedik davranış için söylenir.' },
+{ title: 'Hapı yutmak', meaning: 'Zor durumda kalmak.' },
+{ title: 'Har vurup harman savurmak', meaning: 'Çok savurgan davranmak.' },
+{ title: 'Hatırda tutmak', meaning: 'Aklında bulundurmak.' },
+{ title: 'Hava atmak', meaning: 'Gösteriş yapmak.' },
+{ title: 'Havadan sudan konuşmak', meaning: 'Önemsiz şeylerden konuşmak.' },
+{ title: 'Havalara uçmak', meaning: 'Çok sevinmek.' },
+{ title: 'Havanda su dövmek', meaning: 'Boş iş yapmak.' },
+{ title: 'Havaya savurmak', meaning: 'Parayı dikkatsizce harcamak.' },
+{ title: 'Hayalleri suya düşmek', meaning: 'Umutları boşa çıkmak.' },
+{ title: 'Hayatını kazanmak', meaning: 'Geçimini sağlamak.' },
+{ title: 'Haybeye kürek çekmek', meaning: 'Boşa emek harcamak.' },
+{ title: 'Hayretten donakalmak', meaning: 'Şaşkınlıktan olduğu yerde kalmak.' },
+{ title: 'Hedef saptırmak', meaning: 'Konuyu başka yöne çekmek.' },
+{ title: 'Hem suçlu hem güçlü', meaning: 'Haksızken üstüne haklıymış gibi gitmek.' },
+{ title: 'Her kafadan bir ses çıkmak', meaning: 'Farklı fikirlerin aynı anda dile getirilmesi.' },
+{ title: 'Her telden çalmak', meaning: 'Her konuda konuşmak.' },
+{ title: 'Hesaba katmak', meaning: 'Dikkate almak.' },
+{ title: 'Hesabını bilmek', meaning: 'Ölçülü davranmak.' },
+{ title: 'Hesabını kitabını bilmek', meaning: 'Düzenli, planlı hareket etmek.' },
+{ title: 'Heyheyleri üstünde olmak', meaning: 'Çok öfkeli olmak.' },
+{ title: 'Hık demiş burnundan düşmüş', meaning: 'Çok benzemek.' },
+{ title: 'Hırsından çatlamak', meaning: 'Öfkeden kendini yiyip bitirmek.' },
+{ title: 'Hop oturup hop kalkmak', meaning: 'Çok heyecanlı veya tedirgin olmak.' },
+{ title: 'Işık görmüş tavşana dönmek', meaning: 'Şaşkınlıktan donakalmak.' },
+{ title: 'Işık tutmak', meaning: 'Yol göstermek.' },
+{ title: 'İcat çıkarmak', meaning: 'Gereksiz yenilik ortaya atmak.' },
+{ title: 'İç açıcı olmak', meaning: 'Ferahlatıcı, umut verici olmak.' },
+{ title: 'İç açmak', meaning: 'İçini rahatlatmak.' },
+{ title: 'İç çekmek', meaning: 'Üzüntüyle derin nefes almak.' },
+{ title: 'İç etmek', meaning: 'Malı zimmetine geçirmek.' },
+{ title: 'İç geçirmek', meaning: 'İçten içe özlemek.' },
+{ title: 'İçi açılmak', meaning: 'Rahatlamak, ferahlamak.' },
+{ title: 'İçi burkulmak', meaning: 'Üzülmek.' },
+{ title: 'İçi ezilmek', meaning: 'Büyük acı duymak.' },
+{ title: 'İçi içine sığmamak', meaning: 'Heyecanını gizleyememek.' },
+{ title: 'İçi kazınmak', meaning: 'Çok acıkmak.' },
+{ title: 'İçi parçalanmak', meaning: 'Çok üzülmek.' },
+{ title: 'İçi sıkılmak', meaning: 'Bunaltı hissetmek.' },
+{ title: 'İçi yanmak', meaning: 'Derinden acı duymak.' },
+{ title: 'İçine ateş düşmek', meaning: 'Çok büyük acı yaşamak.' },
+{ title: 'İçine kurt düşmek', meaning: 'İçine şüphe düşmek.' },
+{ title: 'İçini bayıltmak', meaning: 'Bunaltmak, sıkmak.' },
+{ title: 'İçini çekmek', meaning: 'İçten bir nefes almak.' },
+{ title: 'İçini dökmek', meaning: 'Sırlarını, duygularını anlatmak.' },
+{ title: 'İçini ısıtmak', meaning: 'Mutlu etmek.' },
+{ title: 'İçini kemirmek', meaning: 'Sürekli kaygı yaşamak.' },
+{ title: 'İçinin ateşi küllenmek', meaning: 'Acısının azalması.' },
+{ title: 'İçli dışlı olmak', meaning: 'Çok samimi olmak.' },
+{ title: 'İçtiği su ayrı gitmemek', meaning: 'Çok yakın dost olmak.' },
+{ title: 'İğne deliğine girmek', meaning: 'Çok zor durumda kalmak.' },
+{ title: 'İğne ile kuyu kazmak', meaning: 'Büyük sabırla iş yapmak.' },
+{ title: 'İğne ipliğe dönmek', meaning: 'Çok zayıflamak.' },
+{ title: 'İkaz etmek', meaning: 'Uyarmak.' },
+{ title: 'İki ayağını bir pabuca sokmak', meaning: 'Acele ettirmek.' },
+{ title: 'İki dirhem bir çekirdek', meaning: 'Çok süslü, özenli giyinmek.' },
+{ title: 'İki yakası bir araya gelmemek', meaning: 'Sürekli sıkıntı yaşamak.' },
+{ title: 'İlaç gibi', meaning: 'Çok faydalı, iyi gelen.' },
+{ title: 'İlaç gibi gelmek', meaning: 'İhtiyacı karşılamak, rahatlatmak.' },
+{ title: 'İlerisini gerisini düşünmemek', meaning: 'Sonunu hesaba katmadan davranmak.' },
+{ title: 'İliğine işlemek', meaning: 'Çok etkili olmak.' },
+{ title: 'İn cin top oynamak', meaning: 'Çok ıssız olmak.' },
+{ title: 'İnce eleyip sık dokumak', meaning: 'Çok dikkatle davranmak.' },
+{ title: 'İnceldiği yerden kopmak', meaning: 'Zayıf noktadan çözülmek.' },
+{ title: 'İnciler döktürmek', meaning: 'Çok güzel konuşmak.' },
+{ title: 'İncir çekirdeğini doldurmamak', meaning: 'Çok önemsiz olmak.' },
+{ title: 'İpe un sermek', meaning: 'İşten kaçmak için bahane üretmek.' },
+{ title: 'İpiyle kuyuya inilmemek', meaning: 'Güvenilmez olmak.' },
+{ title: 'İşi sıkı tutmak', meaning: 'İhmalkâr davranmamak.' },
+{ title: 'İşi tatlıya bağlamak', meaning: 'Sorunu kavgasız çözmek.' },
+{ title: 'İşi yokuşa sürmek', meaning: 'Zorlaştırmak.' },
+{ title: 'İşler arapsaçına dönmek', meaning: 'Çok karışık hâle gelmek.' },
+{ title: 'İtibardan düşmek', meaning: 'Değerini kaybetmek.' },
+{ title: 'İyi gün dostu', meaning: 'Sadece mutlu günlerde yanında olan.' },
+{ title: 'İzinden yürümek', meaning: 'Onu örnek almak.' },
+{ title: 'Jetonu geç düşmek', meaning: 'Geç anlamak.' },
+{ title: 'Kabak başına patlamak', meaning: 'Suçsuzken sorumluluk üstlenmek.' },
+{ title: 'Kabak tadı vermek', meaning: 'Sıkıcı hâle gelmek.' },
+{ title: 'Kabına sığmamak', meaning: 'Çok heyecanlı, taşkın olmak.' },
+{ title: 'Kabuğu dışına çıkmak', meaning: 'Eski hâlini aşmak.' },
+{ title: 'Kabuğuna çekilmek', meaning: 'İçine kapanmak.' },
+{ title: 'Kabuğunu çatlatmak', meaning: 'Yeni bir aşamaya geçmek.' },
+{ title: 'Kabuk bağlamak', meaning: 'Yaranın iyileşmesi, üzüntünün azalması.' },
+{ title: 'Kaç parça olayım', meaning: 'Sana ne yaptım ki? (yakınma sözü).' },
+{ title: 'Kaçacak delik aramak', meaning: 'Çok utanmak, sıkılmak.' },
+{ title: 'Kadrini bilmek', meaning: 'Değerini bilmek.' },
+{ title: 'Kafa kafaya vermek', meaning: 'Birlikte düşünmek, danışmak.' },
+{ title: 'Kafa patlatmak', meaning: 'Çok düşünmek.' },
+{ title: 'Kafa yormak', meaning: 'Zihnini meşgul etmek.' },
+{ title: 'Kafası durmak', meaning: 'Birden düşünemez hâle gelmek.' },
+{ title: 'Kafası kazan olmak', meaning: 'Çok gürültü içinde bulunmak.' },
+{ title: 'Kafasına dank etmek', meaning: 'Bir gerçeği o anda fark etmek.' },
+{ title: 'Kafasına koymak', meaning: 'Karar vermek.' },
+{ title: 'Kafasını bulandırmak', meaning: 'Kafasını karıştırmak.' },
+{ title: 'Kafasını kızdırmak', meaning: 'Onu sinirlendirmek.' },
+{ title: 'Kafasını kullanmak', meaning: 'Düşünerek hareket etmek.' },
+{ title: 'Kafasını kurcalamak', meaning: 'Aklını meşgul etmek.' },
+{ title: 'Kafasını taştan taşa vurmak', meaning: 'Çok pişman olmak.' },
+{ title: 'Kafasını toplamak', meaning: 'Düşüncelerini düzenlemek.' },
+{ title: 'Kafasını ütülemek', meaning: 'Çok konuşarak bunaltmak.' },
+{ title: 'Kafasının tası atmak', meaning: 'Çok sinirlenmek.' },
+{ title: 'Kafaya koymak', meaning: 'Kararlı olmak.' },
+{ title: 'Kağıt üzerinde kalmak', meaning: 'Gerçeğe dönüşmemek.' },
+{ title: 'Kalbi dayanmamak', meaning: 'Dayanamayacak kadar üzülmek.' },
+{ title: 'Kalbini kırmak', meaning: 'Üzmek.' },
+{ title: 'Kalbiyle konuşmak', meaning: 'Samimi davranmak.' },
+{ title: 'Kale almamak', meaning: 'Önem vermemek.' },
+{ title: 'Kaleme sarılmak', meaning: 'Yazmaya başlamak.' },
+{ title: 'Kalıbından utanmak', meaning: 'Kendisini yaptığı işe yakıştıramamak.' },
+{ title: 'Kalıbını basmak', meaning: 'Kesin inanmak.' },
+{ title: 'Kalp kazanmak', meaning: 'Birinin sevgisini kazanmak.' },
+{ title: 'Kan alacak damarı bilmek', meaning: 'En zayıf yanını bilmek.' },
+{ title: 'Kan başına sıçramak', meaning: 'Çok öfkelenmek.' },
+{ title: 'Kan beynine sıçramak', meaning: 'Çok sinirlenmek.' },
+{ title: 'Kantarın topuzunu kaçırmak', meaning: 'Ölçüyü aşmak.' },
+{ title: 'Kapağı atmak', meaning: 'Bir yere yerleşmek.' },
+{ title: 'Kapana sıkıştırmak', meaning: 'Çıkışsız bırakmak.' },
+{ title: 'Kapı dışarı etmek', meaning: 'Kovmak.' },
+{ title: 'Kapılar yüzüne kapanmak', meaning: 'Her yerden reddedilmek.' },
+{ title: 'Kapıları açık tutmak', meaning: 'İmkân bırakmak.' },
+{ title: 'Kapısına kilit vurmak', meaning: 'İşini kapatmak.' },
+{ title: 'Kapısını aşındırmak', meaning: 'Sürekli gidip gelmek.' },
+{ title: 'Kapısını çalmak', meaning: 'Birine başvurmak.' },
+{ title: 'Kar gibi', meaning: 'Çok temiz, saf.' },
+{ title: 'Kara çalmak', meaning: 'İftira atmak.' },
+{ title: 'Kara kara düşünmek', meaning: 'Kaygılı düşünmek.' },
+{ title: 'Kara listeye almak', meaning: 'Yasaklı duruma getirmek.' },
+{ title: 'Karadeniz’de gemileri batmak', meaning: 'Çok üzgün olmak.' },
+{ title: 'Karalar bağlamak', meaning: 'Büyük üzüntüye kapılmak.' },
+{ title: 'Karar vermek', meaning: 'Bir şey üzerinde sonuca varmak.' },
+{ title: 'Karda yürüyüp izini belli etmemek', meaning: 'Çok gizli iş yapmak.' },
+{ title: 'Kargadan başka kuş tanımamak', meaning: 'Cehalet göstermek.' },
+{ title: 'Karıncayı bile ezmemek', meaning: 'Çok merhametli olmak.' },
+{ title: 'Karıncayı bile incitmemek', meaning: 'Merhametli olmak.' },
+{ title: 'Karnı geniş', meaning: 'Her şeye aldırmayan.' },
+{ title: 'Karnı tok sırtı pek', meaning: 'Rahat, huzurlu olmak.' },
+{ title: 'Karnı zil çalmak', meaning: 'Çok aç olmak.' },
+{ title: 'Karşı çıkmak', meaning: 'İtiraz etmek.' },
+{ title: 'Kaş göz işareti yapmak', meaning: 'İşaretle anlatmak.' },
+{ title: 'Kaşı çatılmak', meaning: 'Somurtmak, üzülmek.' },
+{ title: 'Kaşıkla verip kepçeyle geri almak', meaning: 'Az verip fazlasını almak.' },
+{ title: 'Kaşlarını çatmak', meaning: 'Kızgın görünmek.' },
+{ title: 'Kayıtsız kalmak', meaning: 'İlgilenmemek.' },
+{ title: 'Kaz kusup kızılcık şerbeti içtim demek', meaning: 'Dayak veya eziyeti gizlemek.' },
+{ title: 'Kazan kaldırmak', meaning: 'Ayaklanmak.' },
+{ title: 'Kazdığı çukura kendisi düşmek', meaning: 'Kendi tuzağına yakalanmak.' },
+{ title: 'Keçileri kaçırmak', meaning: 'Aklını yitirmek.' },
+{ title: 'Kedi ciğere bakar gibi bakmak', meaning: 'Çok isteyerek bakmak.' },
+{ title: 'Kedi gibi dört ayağının üstüne düşmek', meaning: 'Zor durumdan şansla kurtulmak.' },
+{ title: 'Kelimeleri tartarak konuşmak', meaning: 'Dikkatle, özenle konuşmak.' },
+{ title: 'Kemer sıkmak', meaning: 'Harcamaları kısmak.' },
+{ title: 'Kemikleri sayılmak', meaning: 'Çok zayıf olmak.' },
+{ title: 'Kendi başının derdine düşmek', meaning: 'Kendi sorununa yoğunlaşmak.' },
+{ title: 'Kendi bildiğini okumak', meaning: 'Başkasını dinlememek.' },
+{ title: 'Kendi hesabına çalışmak', meaning: 'Yalnızca kendi çıkarını gözetmek.' },
+{ title: 'Kendi kuyusunu kazmak', meaning: 'Kendi sonunu hazırlamak.' },
+{ title: 'Kendi yağıyla kavrulmak', meaning: 'Kendi imkânlarıyla geçinmek.' },
+{ title: 'Kendine yontmak', meaning: 'Her şeyi kendi çıkarına çevirmek.' },
+{ title: 'Kendini ağır satmak', meaning: 'Ulaşılması zor görünmek.' },
+{ title: 'Kendini ateşe atmak', meaning: 'Tehlikeye atılmak.' },
+{ title: 'Kendini beğenmek', meaning: 'Kibirli olmak.' },
+{ title: 'Kendini dev aynasında görmek', meaning: 'Kendini olduğundan büyük görmek.' },
+{ title: 'Kendini düşünmek', meaning: 'Yalnızca kendi çıkarını gözetmek.' },
+{ title: 'Kendini kapının dışında bulmak', meaning: 'İşten, yerden kovulmak.' },
+{ title: 'Kendini paralamak', meaning: 'Çok uğraşmak.' },
+{ title: 'Kesenin ağzını açmak', meaning: 'Çok harcamak.' },
+{ title: 'Keyfi kaçmak', meaning: 'Canı sıkılmak.' },
+{ title: 'Keyfi yerine gelmek', meaning: 'Mutlu olmak.' },
+{ title: 'Kılı kırk yarmak', meaning: 'Çok titiz davranmak.' },
+{ title: 'Kılına dokunmamak', meaning: 'Hiç zarar vermemek.' },
+{ title: 'Kim kime dum duma', meaning: 'Hiç kimsenin ilgilenmediği düzensizlik hâli.' },
+{ title: 'Kimi kimsesi olmamak', meaning: 'Yakını olmamak.' },
+{ title: 'Kirli çamaşırları ortaya dökülmek', meaning: 'Gizli kusurların açığa çıkması.' },
+{ title: 'Kokusu çıkmak', meaning: 'Ortaya çıkmak.' },
+{ title: 'Kolayına kaçmak', meaning: 'En kolay yolu seçmek.' },
+{ title: 'Korktuğu başına gelmek', meaning: 'Kötü beklentinin gerçekleşmesi.' },
+{ title: 'Korumaya almak', meaning: 'Güvence altına almak.' },
+{ title: 'Koynunda yılan beslemek', meaning: 'Düşmanını yakınında barındırmak.' },
+{ title: 'Koyun can derdinde kasap yağ derdinde', meaning: 'Herkesin derdi farklıdır.' },
+{ title: 'Kök salmak', meaning: 'Yerleşmek, kökleşmek.' },
+{ title: 'Kömürcü çırağına dönmek', meaning: 'Kir içinde kalmak.' },
+{ title: 'Köprüleri atmak', meaning: 'İlişkileri tamamen kesmek.' },
+{ title: 'Körler çarşısında ayna satmak', meaning: 'Hiç iş yapamamak.' },
+{ title: 'Kötü kötü düşünmek', meaning: 'Olumsuz şeyler düşünmek.' },
+{ title: 'Kulağı delik olmak', meaning: 'Haberleri çabuk duyan olmak.' },
+{ title: 'Kulağı kirişte olmak', meaning: 'Her an dinlemeye hazır olmak.' },
+{ title: 'Kulağına girmemek', meaning: 'Söylenen sözleri duymamazlıktan gelmek.' },
+{ title: 'Kulağına inanmamak', meaning: 'Duyduğuna şaşırmak, doğru bulmamak.' },
+{ title: 'Kulağını açmak', meaning: 'Dikkatle dinlemek.' },
+{ title: 'Kulağını bükmek', meaning: 'Hafifçe uyarmak.' },
+{ title: 'Kulağını çınlatmak', meaning: 'Biri hakkında konuşurken onu anmak.' },
+{ title: 'Kulak arkası etmek', meaning: 'Önem vermemek.' },
+{ title: 'Kulak asmamak', meaning: 'Dikkate almamak.' },
+{ title: 'Kulak kabartmak', meaning: 'Gizlice dinlemek.' },
+{ title: 'Kulak kesilmek', meaning: 'Büyük dikkatle dinlemek.' },
+{ title: 'Kulak vermek', meaning: 'Özenle dinlemek.' },
+{ title: 'Kulakları ağır işitmek', meaning: 'İyi duyamamak.' },
+{ title: 'Kulakları paslanmak', meaning: 'Uzun süre güzel ses duymadığı için kulakların alışkanlığını yitirmesi.' },
+{ title: 'Kulaklarına kadar kızarmak', meaning: 'Çok utanmak.' },
+{ title: 'Kulaklarının pasını gidermek', meaning: 'Güzel bir sesle rahatlamak.' },
+{ title: 'Kurtlarını dökmek', meaning: 'İçindeki sıkıntıyı eğlenerek atmak.' },
+{ title: 'Kuru gürültüye pabuç bırakmamak', meaning: 'Boş tehditlere boyun eğmemek.' },
+{ title: 'Kuş uçmaz kervan geçmez', meaning: 'Çok ıssız, tenha yer.' },
+{ title: 'Kuş uçurtmamak', meaning: 'Hiçbir şeye izin vermemek.' },
+{ title: 'Kuşa benzemek', meaning: 'Çok zayıf düşmek.' },
+{ title: 'Kuyruğu kapana kısılmak', meaning: 'Çıkış yolu kalmamak.' },
+{ title: 'Kuyruğunu kısmak', meaning: 'Korkup susmak.' },
+{ title: 'Kuzu kesilmek', meaning: 'Sessiz ve uysal olmak.' },
+{ title: 'Küçük dilini yutmak', meaning: 'Aşırı şaşırmak.' },
+{ title: 'Küplere binmek', meaning: 'Çok öfkelenmek.' },
+{ title: 'Laf anlamamak', meaning: 'Söyleneni kavrayamamak.' },
+{ title: 'Lafa dalmak', meaning: 'Konuşmaya dalmak.' },
+{ title: 'Lafı ağzında gevelemek', meaning: 'Söyleyeceğini açıkça söyleyememek.' },
+{ title: 'Lafı gediğine koymak', meaning: 'Yerinde ve doğru söz söylemek.' },
+{ title: 'Lafı sulandırmak', meaning: 'Ciddiyeti bozmak.' },
+{ title: 'Leb demeden leblebiyi anlamak', meaning: 'Söyleneni hemen kavramak.' },
+{ title: 'Leyleği havada görmek', meaning: 'Çok gezen kimse için söylenir.' },
+{ title: 'Madalyonun ters tarafı', meaning: 'Bir olayın olumsuz yanı.' },
+{ title: 'Mahcup olmak', meaning: 'Utanmak.' },
+{ title: 'Mahçup olmak', meaning: 'Utanmak.' },
+{ title: 'Mal etmek', meaning: 'Sahiplenmek.' },
+{ title: 'Mangal gibi yüreği olmak', meaning: 'Çok cesur olmak.' },
+{ title: 'Mangalda kül bırakmamak', meaning: 'Çok övünmek.' },
+{ title: 'Masal okumak', meaning: 'Yalan söylemek.' },
+{ title: 'Maskesini düşürmek', meaning: 'Gerçek yüzünü ortaya çıkarmak.' },
+{ title: 'Masrafa girmek', meaning: 'Harcama yapmak.' },
+{ title: 'Maşa varken elini yakmak', meaning: 'Aracı varken işin sıkıntısını üstlenmek.' },
+{ title: 'Maydanoz olmak', meaning: 'Her işe karışmak.' },
+{ title: 'Maziye karışmak', meaning: 'Geçmişte kalmak.' },
+{ title: 'Mesul tutmak', meaning: 'Sorumlu saymak.' },
+{ title: 'Meydan okumak', meaning: 'Cesaretle karşı çıkmak.' },
+{ title: 'Mırın kırın etmek', meaning: 'Oyalayıcı bahaneler üretmek.' },
+{ title: 'Midesi kazınmak', meaning: 'Çok acıkmak.' },
+{ title: 'Mum kesilmek', meaning: 'Donup kalmak.' },
+{ title: 'Mumla aramak', meaning: 'Çok arayıp bulamamak.' },
+{ title: 'Mücadele etmek', meaning: 'Çaba göstermek.' },
+{ title: 'Mürekkebi kurumadan', meaning: 'Çok kısa süre önce yazılmış.' },
+{ title: 'Nabız yoklamak', meaning: 'Karşı tarafın düşüncesini öğrenmeye çalışmak.' },
+{ title: 'Nabza göre şerbet vermek', meaning: 'Duruma göre davranmak.' },
+{ title: 'Nam salmak', meaning: 'Ün kazanmak.' },
+{ title: 'Ne hâli varsa görsün', meaning: 'Beni ilgilendirmez anlamında söylenir.' },
+{ title: 'Ne oldum delisi olmak', meaning: 'Birden kibirlenmek.' },
+{ title: 'Nefes aldırmamak', meaning: 'Hiç rahat bırakmamak.' },
+{ title: 'Nefes tüketmek', meaning: 'Boşuna konuşmak.' },
+{ title: 'Nerede akşam orada sabah', meaning: 'Düzenli yaşamayan kimse için söylenir.' },
+{ title: 'Nispet yapmak', meaning: 'Başkasını kıskandıracak tavırda bulunmak.' },
+{ title: 'Ok yaydan çıkmak', meaning: 'Geri dönüşü olmayan yola girmek.' },
+{ title: 'Omuzları çökmek', meaning: 'Yorgun düşmek, üzülmek.' },
+{ title: 'On para etmemek', meaning: 'Hiç değeri olmamak.' },
+{ title: 'On parmağında on marifet', meaning: 'Çok becerikli olmak.' },
+{ title: 'Ortalığı ayağa kaldırmak', meaning: 'Büyük kargaşa çıkarmak.' },
+{ title: 'Otuz iki dişe keman çaldırmak', meaning: 'Çok gülmek.' },
+{ title: 'Oyuna gelmemek', meaning: 'Aldanmamak.' },
+{ title: 'Ödü kopmak', meaning: 'Çok korkmak.' },
+{ title: 'Ödü patlamak', meaning: 'Çok korkmak.' },
+{ title: 'Öküz altında buzağı aramak', meaning: 'Gereksiz şüphe duymak.' },
+{ title: 'Öküzün trene baktığı gibi bakmak', meaning: 'Aptalca bakmak.' },
+{ title: 'Ölçülü olmak', meaning: 'Aşırıya kaçmamak.' },
+{ title: 'Ölçüyü kaçırmak', meaning: 'Aşırılığa gitmek.' },
+{ title: 'Ömrüne ömür katmak', meaning: 'Sağlığını, mutluluğunu artırmak.' },
+{ title: 'Önayak olmak', meaning: 'Öncülük etmek.' },
+{ title: 'Öne çıkmak', meaning: 'Dikkat çekmek.' },
+{ title: 'Özrü kabahatinden büyük', meaning: 'Özrü suçundan daha kötü olmak.' },
+{ title: 'Pabucu dama atılmak', meaning: 'Değerini yitirmek.' },
+{ title: 'Pabucuna taş kaçmak', meaning: 'İşinde aksaklık yaşamak.' },
+{ title: 'Pabuç kadar dili olmak', meaning: 'Çok geveze olmak.' },
+{ title: 'Pabuç pahalı', meaning: 'Durum zor, tehlikeli.' },
+{ title: 'Paçası tutuşmak', meaning: 'Telaşlanmak.' },
+{ title: 'Paçayı kaptırmak', meaning: 'Çıkılmaz duruma girmek.' },
+{ title: 'Palavra sıkmak', meaning: 'Yalan söylemek.' },
+{ title: 'Palyaço gibi', meaning: 'Aşırı gülünç davranmak.' },
+{ title: 'Pamuk gibi', meaning: 'Çok yumuşak huylu olmak.' },
+{ title: 'Paniğe kapılmak', meaning: 'Korku ve telaşa düşmek.' },
+{ title: 'Para babası', meaning: 'Çok zengin kişi.' },
+{ title: 'Para dökmek', meaning: 'Çok para harcamak.' },
+{ title: 'Parmağı ağzında kalmak', meaning: 'Hayret etmek.' },
+{ title: 'Parmağında oynatmak', meaning: 'İstediği gibi yönlendirmek.' },
+{ title: 'Parmakla gösterilmek', meaning: 'Çok beğenilen olmak.' },
+{ title: 'Parmaklarını yemek', meaning: 'Çok beğenmek, imrenmek.' },
+{ title: 'Patlak vermek', meaning: 'Ortaya çıkmak.' },
+{ title: 'Pencere açmak', meaning: 'Fırsat vermek.' },
+{ title: 'Pili bitmek', meaning: 'Yorgun düşmek.' },
+{ title: 'Pire için yorgan yakmak', meaning: 'Küçük şey için büyük zarar vermek.' },
+{ title: 'Pireyi deve yapmak', meaning: 'Küçük meseleyi büyütmek.' },
+{ title: 'Pireyi gözünden vurmak', meaning: 'Çok dikkatli, titiz olmak.' },
+{ title: 'Pişmiş aşa su katmak', meaning: 'Bozmak, işin düzenini karıştırmak.' },
+{ title: 'Pot kırmak', meaning: 'İncitici, kırıcı söz söylemek.' },
+{ title: 'Poz vermek', meaning: 'Fotoğraf için durmak ya da gösteriş yapmak.' },
+{ title: 'Problem olmak', meaning: 'Sorun hâline gelmek.' },
+{ title: 'Punduna getirmek', meaning: 'Uygun zamanı kollayıp yapmak.' },
+{ title: 'Pusulayı şaşırmak', meaning: 'Ne yapacağını bilememek.' },
+{ title: 'Rafa kaldırmak', meaning: 'Bir işi gündemden çıkarmak.' },
+{ title: 'Renk katmak', meaning: 'Canlılık kazandırmak.' },
+{ title: 'Renk vermemek', meaning: 'Hislerini belli etmemek.' },
+{ title: 'Renkten renge girmek', meaning: 'Yüzünün sık sık değişmesi.' },
+{ title: 'Rol almak', meaning: 'Bir işte görev üstlenmek.' },
+{ title: 'Rüzgâr gelecek dalları tıkamak', meaning: 'Gelecek tehlikeyi önlemeye çalışmak.' },
+{ title: 'Rüzgârdan nem kapmak', meaning: 'Ufak şeyden şüphelenmek.' },
+{ title: 'Saati saatine uymamak', meaning: 'Hâli tavrı değişken olmak.' },
+{ title: 'Sabır taşı', meaning: 'Çok sabırlı kimse.' },
+{ title: 'Sabun köpüğü gibi sönmek', meaning: 'Kısa sürede etkisini yitirmek.' },
+{ title: 'Saç ağartmak', meaning: 'Yıllar geçirmek, tecrübe edinmek.' },
+{ title: 'Saç sakal ağartmak', meaning: 'Uzun zaman yaşlanmak, deneyim kazanmak.' },
+{ title: 'Saçına kar yağmak', meaning: 'Yaşlanmak.' },
+{ title: 'Saçını başını yolmak', meaning: 'Büyük öfke ya da üzüntü göstermek.' },
+{ title: 'Saçını süpürge etmek', meaning: 'Kendini feda etmek.' },
+{ title: 'Sağ gösterip sol vurmak', meaning: 'Aldatmak.' },
+{ title: 'Sağını solunu bilmemek', meaning: 'Çocuk ya da bilgisiz kişi için söylenir.' },
+{ title: 'Sağlam kazığa bağlamak', meaning: 'Önlemini almak.' },
+{ title: 'Sağlam pabuç değil', meaning: 'Güvenilmez kişi.' },
+{ title: 'Sağlam pabuç olmamak', meaning: 'Güvenilmez olmak.' },
+{ title: 'Sağlık olsun', meaning: 'Olanı önemsememek, gönül rahatlığı.' },
+{ title: 'Saman altından su yürütmek', meaning: 'Gizli işler çevirmek.' },
+{ title: 'Sapla samanı karıştırmak', meaning: 'İlgisiz şeyleri karıştırmak.' },
+{ title: 'Senli benli olmak', meaning: 'Samimi olmak.' },
+{ title: 'Ser verip sır vermemek', meaning: 'Ölse de sır saklamak.' },
+{ title: 'Ses çıkarmamak', meaning: 'Sessiz kalmak.' },
+{ title: 'Sevgi beslemek', meaning: 'İçten sevgi duymak.' },
+{ title: 'Sevinci kursağında kalmak', meaning: 'Sevinci kısa sürmek.' },
+{ title: 'Sıfıra inmek', meaning: 'Tamamen yok olmak.' },
+{ title: 'Sıfırdan başlamak', meaning: 'Baştan başlamak.' },
+{ title: 'Sıfırı tüketmek', meaning: 'Her şeyini yitirmek.' },
+{ title: 'Sıkı durmak', meaning: 'Dayanıklı, sağlam durmak.' },
+{ title: 'Sırt çevirmek', meaning: 'Arkasını dönmek, ilgilenmemek.' },
+{ title: 'Sırtından geçinmek', meaning: 'Onun emeğiyle yaşamak.' },
+{ title: 'Sırtını yere getirmek', meaning: 'Yenmek.' },
+{ title: 'Sinek avlamak', meaning: 'İş yapamamak, müşteri bulamamak.' },
+{ title: 'Sineye çekmek', meaning: 'Katlanmak.' },
+{ title: 'Sinirlerini bozmak', meaning: 'Çok üzmek ya da kızdırmak.' },
+{ title: 'Soğuk durmak', meaning: 'İlgisiz, uzak davranmak.' },
+{ title: 'Soğuk duş etkisi yapmak', meaning: 'Birden bire hayal kırıklığı yaratmak.' },
+{ title: 'Sol tarafından kalkmak', meaning: 'Huysuz olmak.' },
+{ title: 'Soluk aldırmamak', meaning: 'Hiç fırsat tanımamak.' },
+{ title: 'Sorumluluk almak', meaning: 'Görev üstlenmek.' },
+{ title: 'Soyup soğana çevirmek', meaning: 'Malını mülkünü elinden almak.' },
+{ title: 'Söz dinlemek', meaning: 'Öğütlere uymak.' },
+{ title: 'Söz geçirmek', meaning: 'Etkili olmak.' },
+{ title: 'Söz uzatmak', meaning: 'Gereksiz yere konuşmak.' },
+{ title: 'Sözde kalmak', meaning: 'Gerçekleşmemek.' },
+{ title: 'Sözü geçmek', meaning: 'Etkili söz sahibi olmak.' },
+{ title: 'Sözünde durmak', meaning: 'Verdiği sözü yerine getirmek.' },
+{ title: 'Sözünden çıkmamak', meaning: 'İtaat etmek.' },
+{ title: 'Sözünü balla kesmek', meaning: 'Güzel sözle konuşmayı bölmek.' },
+{ title: 'Sözünü dinlemek', meaning: 'Öğüdünü dikkate almak.' },
+{ title: 'Sözünü tutmak', meaning: 'Söylediğini yapmak.' },
+{ title: 'Sözünün eri', meaning: 'Sözünde duran kişi.' },
+{ title: 'Su koyvermek', meaning: 'İşi boşlamak.' },
+{ title: 'Su sabun görmemek', meaning: 'Bakımsız kalmak.' },
+{ title: 'Sudan çıkmış balığa dönmek', meaning: 'Şaşkın ve yabancı kalmak.' },
+{ title: 'Sudan ucuz', meaning: 'Çok ucuz.' },
+{ title: 'Surat asmak', meaning: 'Somurtmak.' },
+{ title: 'Surat mahkeme duvarı', meaning: 'Katı, soğuk yüz ifadesi.' },
+{ title: 'Suratı bir karış asılmak', meaning: 'Çok somurtmak.' },
+{ title: 'Suratı sirke satmak', meaning: 'Asık yüzlü olmak.' },
+{ title: 'Suya sabuna dokunmamak', meaning: 'Tarafsız kalmak.' },
+{ title: 'Sünger çekmek', meaning: 'Hesabı kapatmak, unutmak.' },
+{ title: 'Süt dökmüş kediye dönmek', meaning: 'Çok mahcup olmak.' },
+{ title: 'Şapka çıkarmak', meaning: 'Saygı göstermek.' },
+{ title: 'Şekerleme yapmak', meaning: 'Kısa uyku uyumak.' },
+{ title: 'Şimşekleri üstüne çekmek', meaning: 'Tepki toplamak.' },
+{ title: 'Şöhreti dünyayı tutmak', meaning: 'Ünü her yere yayılmak.' },
+{ title: 'Tabana kuvvet kaçmak', meaning: 'Koşarak uzaklaşmak.' },
+{ title: 'Tadı tuzu kalmamak', meaning: 'Zevksiz hâle gelmek.' },
+{ title: 'Tadını çıkarmak', meaning: 'Zevkini sürmek.' },
+{ title: 'Tadını tuzunu bulmak', meaning: 'En iyi hâline gelmek.' },
+{ title: 'Tansiyonu düşürmek', meaning: 'Gerilimi azaltmak.' },
+{ title: 'Taş atıp kolu yorulmamak', meaning: 'Emek harcamadan iş yapmak.' },
+{ title: 'Taş atmak', meaning: 'İmalı söz söylemek.' },
+{ title: 'Taş kesilmek', meaning: 'Donup kalmak.' },
+{ title: 'Tatlı canını sıkmak', meaning: 'Gereksiz yere üzülmek.' },
+{ title: 'Tatlı yerinde kesmek', meaning: 'Bir şeyi tam güzellikte bırakmak.' },
+{ title: 'Tavşan yürekli', meaning: 'Çok korkak.' },
+{ title: 'Tavuk gibi', meaning: 'Erken uyuyan veya ürkek kimse için.' },
+{ title: 'Tencerede pişirip kapağında yemek', meaning: 'Her şeyi kendi çıkarı için kullanmak.' },
+{ title: 'Tepeden bakmak', meaning: 'Küçümsemek.' },
+{ title: 'Tepesi atmak', meaning: 'Birden öfkelenmek.' },
+{ title: 'Tepesinin tası atmak', meaning: 'Çok sinirlenmek.' },
+{ title: 'Ter dökmek', meaning: 'Çok çalışmak.' },
+{ title: 'Tereciye tere satmak', meaning: 'Bilene akıl öğretmeye kalkışmak.' },
+{ title: 'Tereyağından kıl çeker gibi', meaning: 'Çok kolayca yapmak.' },
+{ title: 'Testi kırılmadan', meaning: 'İş bozulmadan.' },
+{ title: 'Tetik üstünde beklemek', meaning: 'Dikkatli, hazır olmak.' },
+{ title: 'Tetikte beklemek', meaning: 'Hazırda beklemek.' },
+{ title: 'Timsah gözyaşı dökmek', meaning: 'Samimiyetsiz üzülmek.' },
+{ title: 'Tiye almak', meaning: 'Alay etmek.' },
+{ title: 'Tok evin aç kedisi', meaning: 'Her şeye rağmen doyumsuz davranmak.' },
+{ title: 'Tok gözlü olmak', meaning: 'Elindekine kanaat eden, gözü aç olmayan.' },
+{ title: 'Tok karşılama', meaning: 'Sakin ve olgun davranışla karşılamak.' },
+{ title: 'Tok sözlü olmak', meaning: 'Ölçülü, ağırbaşlı konuşmak.' },
+{ title: 'Tokat gibi söz', meaning: 'Çok etkileyici ve sarsıcı söz.' },
+{ title: 'Topa tutmak', meaning: 'Çok sert eleştirmek.' },
+{ title: 'Topu başkasına atmak', meaning: 'Sorumluluktan kaçıp başkasına yüklemek.' },
+{ title: 'Topu taca atmak', meaning: 'Konuyu saptırmak.' },
+{ title: 'Topu topu', meaning: 'Ancak, en fazla.' },
+{ title: 'Topuklamak', meaning: 'Kaçmak.' },
+{ title: 'Topyekûn saldırmak', meaning: 'Hep birlikte hücum etmek.' },
+{ title: 'Topyekûn savaş', meaning: 'Her şeyiyle katılınan savaş.' },
+{ title: 'Törpülemek', meaning: 'Sertliği, keskinliği azaltmak.' },
+{ title: 'Tozu dumana katmak', meaning: 'Büyük kargaşa çıkarmak.' },
+{ title: 'Toz olmak', meaning: 'Ortadan kaybolmak.' },
+{ title: 'Toz yutmak', meaning: 'Çok çalışmak veya geride kalmak.' },
+{ title: 'Tuhafına gitmek', meaning: 'Garip bulmak.' },
+{ title: 'Turp gibi olmak', meaning: 'Çok sağlıklı olmak.' },
+{ title: 'Tuz buz olmak', meaning: 'Paramparça olmak.' },
+{ title: 'Tuz ekmek', meaning: 'Zarar üstüne zarar vermek.' },
+{ title: 'Tuzla buz olmak', meaning: 'Tamamen parçalanmak.' },
+{ title: 'Tuzluya mal olmak', meaning: 'Çok pahalıya patlamak.' },
+{ title: 'Ucunu açık bırakmak', meaning: 'Belirsizlik bırakmak.' },
+{ title: 'Ucunu kaçırmak', meaning: 'Ölçüyü aşmak.' },
+{ title: 'Ucuz atlatmak', meaning: 'Küçük zararla kurtulmak.' },
+{ title: 'Ucuza gitmek', meaning: 'Değerinden azına satılmak.' },
+{ title: 'Uğruna ölmek', meaning: 'Çok sevmek, uğrunda her şeyi göze almak.' },
+{ title: 'Uğur getirmek', meaning: 'İyilik getirmek.' },
+{ title: 'Umut bağlamak', meaning: 'Beklenti içine girmek.' },
+{ title: 'Un ufak etmek', meaning: 'Parçalamak.' },
+{ title: 'Unutulup gitmek', meaning: 'Zamanla hatırlanmamak.' },
+{ title: 'Uykusu gelmek', meaning: 'Uyku bastırmak.' },
+{ title: 'Uykusuz kalmak', meaning: 'Gece uyuyamamak.' },
+{ title: 'Uyum sağlamak', meaning: 'Uygun hâle gelmek.' },
+{ title: 'Uyum içinde olmak', meaning: 'Uyuşmak, anlaşmak.' },
+{ title: 'Uzaktan yakından ilgisi olmamak', meaning: 'Hiç alakası olmamak.' },
+{ title: 'Uzun boylu', meaning: 'Gereksiz yere uzatılmış.' },
+{ title: 'Üç aşağı beş yukarı', meaning: 'Yaklaşık olarak.' },
+{ title: 'Üç kuruşa beş köfte', meaning: 'Çok ucuz, hesaplı.' },
+{ title: 'Üç kâğıtçılık yapmak', meaning: 'Hile yapmak.' },
+{ title: 'Ümit kesmek', meaning: 'Umutlarını yitirmek.' },
+{ title: 'Ümit vermek', meaning: 'Beklentiye yol açmak.' },
+{ title: 'Ümidini kaybetmek', meaning: 'Umutsuzluğa düşmek.' },
+{ title: 'Ümitlenmek', meaning: 'Umut beslemek.' },
+{ title: 'Üst başı dağınık', meaning: 'Bakımsız görünmek.' },
+{ title: 'Üst başı perişan', meaning: 'Dağınık giyinmiş.' },
+{ title: 'Üstüne almak', meaning: 'Kendine yönelik sanmak.' },
+{ title: 'Üstüne basa basa', meaning: 'Vurgulayarak söylemek.' },
+{ title: 'Üstüne düşmek', meaning: 'Çok ilgilenmek.' },
+{ title: 'Üstüne gelmek', meaning: 'Üstüne varmak, yüklenmek.' },
+{ title: 'Üstüne kalmak', meaning: 'Sorumluluğun onun üzerine bırakılması.' },
+{ title: 'Üstüne titremek', meaning: 'Çok özen göstermek.' },
+{ title: 'Üstünden atmak', meaning: 'Sorumluluktan kurtulmak.' },
+{ title: 'Üstünü örtmek', meaning: 'Gizlemek.' },
+{ title: 'Üstü kapalı söylemek', meaning: 'İmalı konuşmak.' },
+{ title: 'Üstüme gelme', meaning: 'Üzerime baskı yapma.' },
+{ title: 'Üstüme yok', meaning: 'Benden iyisi yok.' },
+{ title: 'Üzerine almak', meaning: 'Kendine pay çıkarmak.' },
+{ title: 'Üzerine gitmek', meaning: 'Sorunu zorlamak.' },
+{ title: 'Üzerine kalmak', meaning: 'Sorumluluğu üstlenmek.' },
+{ title: 'Üzerine titremek', meaning: 'Çok korumak.' },
+{ title: 'Üzgün olmak', meaning: 'Kederli olmak.' },
+{ title: 'Üzüm üzüme baka baka kararır', meaning: 'İnsanlar birbirine benzer.' },
+{ title: 'Vakit geçirmek', meaning: 'Zamanı değerlendirmek.' },
+{ title: 'Vakit kaybetmek', meaning: 'Zamanı boşa harcamak.' },
+{ title: 'Vakit öldürmek', meaning: 'Zamanı gereksiz harcamak.' },
+{ title: 'Vakitlice gitmek', meaning: 'Erken gitmek.' },
+{ title: 'Vazgeçmek', meaning: 'Bir düşünceyi bırakmak.' },
+{ title: 'Vicdan azabı çekmek', meaning: 'Suçluluk duygusu yaşamak.' },
+{ title: 'Vicdan rahatlığı', meaning: 'İç huzuru.' },
+{ title: 'Virane gibi', meaning: 'Çok bakımsız.' },
+{ title: 'Ya nasip', meaning: 'Kısmete bağlanmış söz.' },
+{ title: 'Yaka paça olmak', meaning: 'Boğuşmak.' },
+{ title: 'Yaka silkmek', meaning: 'Bıkmak.' },
+{ title: 'Yakayı ele vermek', meaning: 'Yakalanmak.' },
+{ title: 'Yakın olmak', meaning: 'Samimiyet kurmak.' },
+{ title: 'Yakınlık göstermek', meaning: 'İyi davranmak.' },
+{ title: 'Yakıp yıkmak', meaning: 'Çok zarar vermek.' },
+{ title: 'Yalancı çıkmak', meaning: 'Söylediği yalanın ortaya çıkması.' },
+{ title: 'Yalancı pehlivan', meaning: 'Güçlü görünüp aslında zayıf olan.' },
+{ title: 'Yalancı şahit', meaning: 'Gerçeğe aykırı tanıklık yapan.' },
+{ title: 'Yalnız kalmak', meaning: 'Tek başına olmak.' },
+{ title: 'Yan çizmek', meaning: 'Kaçınmak.' },
+{ title: 'Yan gözle bakmak', meaning: 'Şüpheyle veya küçümseyerek bakmak.' },
+{ title: 'Yan yana gelmemek', meaning: 'Bir araya gelmemek.' },
+{ title: 'Yanında kalmak', meaning: 'Payına düşenle yetinmek.' },
+{ title: 'Yanında olmak', meaning: 'Desteklemek.' },
+{ title: 'Yanıp tutuşmak', meaning: 'Çok özlemek ya da istemek.' },
+{ title: 'Yanlışa düşmek', meaning: 'Hata yapmak.' },
+{ title: 'Yanlış yola sapmak', meaning: 'Kötü davranışa yönelmek.' },
+{ title: 'Yarım ağızla söylemek', meaning: 'İsteksizce dile getirmek.' },
+{ title: 'Yarım yamalak', meaning: 'Eksik, kusurlu.' },
+{ title: 'Yarına çıkmak', meaning: 'Ertesi günü görmek.' },
+{ title: 'Yarını düşünmek', meaning: 'Geleceği hesaba katmak.' },
+{ title: 'Yarını olmayan', meaning: 'Umursamazca yaşayan.' },
+{ title: 'Yarışa girmek', meaning: 'Rekabete katılmak.' },
+{ title: 'Yaş tahtaya basmamak', meaning: 'Dikkatli davranmak.' },
+{ title: 'Yaşam kavgası', meaning: 'Geçim mücadelesi.' },
+{ title: 'Yaşlı gözlerle bakmak', meaning: 'Gözyaşlı bakmak.' },
+{ title: 'Yaşını başını almak', meaning: 'Olgunlaşmak.' },
+{ title: 'Yaşlı kurt', meaning: 'Çok tecrübeli kişi.' },
+{ title: 'Yatağa düşmek', meaning: 'Hastalanıp yataktan kalkamamak.' },
+{ title: 'Yatağını yapmak', meaning: 'Düzenini kurmak.' },
+{ title: 'Yatağını yorganını sermek', meaning: 'Kalıcı olmaya hazırlanmak.' },
+{ title: 'Yatacak yerin yok', meaning: 'Çok kötü davranış için kullanılan ağır söz.' },
+{ title: 'Yatırımlık yapmak', meaning: 'İlerisi için biriktirmek.' },
+{ title: 'Yatıp kalkmak', meaning: 'Sürekli bir şeyi anmak ya da şükretmek.' },
+{ title: 'Yavaş gitmek', meaning: 'Ağır adımlarla ilerlemek.' },
+{ title: 'Yavaş yavaş', meaning: 'Zamanla, tedricen.' },
+{ title: 'Yavan kalmak', meaning: 'Lezzetsiz, etkisiz olmak.' },
+{ title: 'Yaygara koparmak', meaning: 'Gereksiz gürültü çıkarmak.' },
+{ title: 'Yayın yapmak', meaning: 'Bilgi ya da haber aktarmak.' },
+{ title: 'Yazı tura atmak', meaning: 'Kura çekmek.' },
+{ title: 'Yazık etmek', meaning: 'Değerini harcamak.' },
+{ title: 'Yazıyla çizmek', meaning: 'Kaydetmek.' },
+{ title: 'Yedek kulübesine oturtmak', meaning: 'Geri plana atmak.' },
+{ title: 'Yedi cihana ün salmak', meaning: 'Ünü her yere yayılmak.' },
+{ title: 'Yedi kat yerin dibine geçmek', meaning: 'Utançtan kaybolmak istemek.' },
+{ title: 'Yedi kat göğe çıkmak', meaning: 'Çok mutlu olmak.' },
+{ title: 'Yedi iklim dört bucak', meaning: 'Her yer, bütün dünya.' },
+{ title: 'Yediği içtiği ayrı gitmemek', meaning: 'Çok samimi olmak.' },
+{ title: 'Yediği naneyi yemek', meaning: 'Başına iş açmak.' },
+{ title: 'Yediği tokadı yemek', meaning: 'Dayak yemek.' },
+{ title: 'Yediği haltı yapmak', meaning: 'Yanlış iş yapmak.' },
+{ title: 'Yediği önünde yemediği ardında', meaning: 'Çok bolluk içinde yaşamak.' },
+{ title: 'Yediveren gül', meaning: 'Sürekli çiçek açan.' },
+{ title: 'Yedirmek istememek', meaning: 'Paylaşmak istememek.' },
+{ title: 'Yeğen yerine koymak', meaning: 'Çok yakın görmek.' },
+{ title: 'Yer açmak', meaning: 'Alan bırakmak.' },
+{ title: 'Yer almak', meaning: 'Yer edinmek.' },
+{ title: 'Yer etmek', meaning: 'Kalıcı hâle gelmek.' },
+{ title: 'Yerinde duramamak', meaning: 'Hareketli olmak.' },
+{ title: 'Yerinde saymak', meaning: 'İlerleme kaydetmemek.' },
+{ title: 'Yerinde söz söylemek', meaning: 'Doğru zamanda konuşmak.' },
+{ title: 'Yerle yeksan olmak', meaning: 'Yerle bir olmak.' },
+{ title: 'Yerin dibine batmak', meaning: 'Utanç duymak.' },
+{ title: 'Yerin kulağı var', meaning: 'Gizli şeyler duyulabilir.' },
+{ title: 'Yeri göğü inletmek', meaning: 'Çok ses çıkarmak.' },
+{ title: 'Yerleşik düzen', meaning: 'Kalıcı yaşam biçimi.' },
+{ title: 'Yerleşmek', meaning: 'Bir yerde kalıcı olmak.' },
+{ title: 'Yeryüzünde cennet', meaning: 'Çok güzel yer.' },
+{ title: 'Yıldırım gibi gitmek', meaning: 'Çok hızlı gitmek.' },
+{ title: 'Yıldız gibi parlamak', meaning: 'Çok dikkat çekmek.' },
+{ title: 'Yıldızı barışmamak', meaning: 'Anlaşamamak.' },
+{ title: 'Yıldızı parlamak', meaning: 'Ünü artmak.' },
+{ title: 'Yıldız falına bakmak', meaning: 'Burç yorumu yapmak.' },
+{ title: 'Yıldız kayması', meaning: 'Gökte kayan yıldız olayı.' },
+{ title: 'Yıldızları saymak', meaning: 'Çok uykusuz kalmak.' },
+{ title: 'Yıldızları görmek', meaning: 'Baş dönmesiyle ışıklar görmek.' },
+{ title: 'Yine başa dönmek', meaning: 'Baştan başlamak.' },
+{ title: 'Yine yollara düşmek', meaning: 'Yeniden yolculuğa çıkmak.' },
+{ title: 'Yine eski tas eski hamam', meaning: 'Hiçbir şey değişmemiş.' },
+{ title: 'Yine kaldığı yerden devam etmek', meaning: 'Ara verilen işe tekrar başlamak.' },
+{ title: 'Yine tasını tarağını toplamak', meaning: 'Eşyalarını alıp gitmek.' },
+{ title: 'Yine yerinde saymak', meaning: 'İlerleyememek.' },
+{ title: 'Yine yolunu kaybetmek', meaning: 'Yanlış yola sapmak.' },
+{ title: 'Yoğurda kara çalmak', meaning: 'İftira atmak.' },
+{ title: 'Yok yere', meaning: 'Sebepsiz.' },
+{ title: 'Yok olmak', meaning: 'Tamamen kaybolmak.' },
+{ title: 'Yoklama yapmak', meaning: 'Kontrol etmek.' },
+{ title: 'Yoksulluk çekmek', meaning: 'Fakirlik yaşamak.' },
+{ title: 'Yoldan çıkmak', meaning: 'Kötü yola sapmak.' },
+{ title: 'Yoldaş olmak', meaning: 'Arkadaş olmak.' },
+{ title: 'Yol göstermek', meaning: 'Rehberlik etmek.' },
+{ title: 'Yol kat etmek', meaning: 'Mesafe almak.' },
+{ title: 'Yoluna girmek', meaning: 'Düzenli hâle gelmek.' },
+{ title: 'Yolunu bulmak', meaning: 'Çare bulmak.' },
+{ title: 'Yolunu kaybetmek', meaning: 'Yanlış yöne gitmek.' },
+{ title: 'Yolunu şaşırmak', meaning: 'Ne yapacağını bilememek.' },
+{ title: 'Yolunu tutmak', meaning: 'O yöne yönelmek.' },
+{ title: 'Yolunu yitirmek', meaning: 'Kaybolmak.' },
+{ title: 'Yorgan döşek yatmak', meaning: 'Çok hasta olmak.' },
+{ title: 'Yorgan gürültüsü', meaning: 'Gürültülü kavga.' },
+{ title: 'Yorganı üzerine çekmek', meaning: 'Kendini korumaya almak.' },
+{ title: 'Yosma gibi süslenmek', meaning: 'Gösterişli giyinmek.' },
+{ title: 'Yumak yapmak', meaning: 'Düğümlenmek.' },
+{ title: 'Yumruğunu masaya vurmak', meaning: 'Kararlı davranmak.' },
+{ title: 'Yumruk yemek', meaning: 'Darbe almak.' },
+{ title: 'Yumurta kapıya dayanınca', meaning: 'Zorunluluk karşısında kalınca.' },
+{ title: 'Yüreği ağzına gelmek', meaning: 'Çok korkmak.' },
+{ title: 'Yüreği burkulmak', meaning: 'Üzülmek.' },
+{ title: 'Yüreği hop etmek', meaning: 'Heyecanlanmak.' },
+{ title: 'Yüreği parçalanmak', meaning: 'Çok üzülmek.' },
+{ title: 'Yüreği sızlamak', meaning: 'Acımak, üzülmek.' },
+{ title: 'Yüreği yanmak', meaning: 'İçten acı çekmek.' },
+{ title: 'Yüreği yerinden oynamak', meaning: 'Çok korkmak ya da sevinmek.' },
+{ title: 'Yüreğine inmek', meaning: 'Büyük üzüntü yaşamak.' },
+{ title: 'Yüreğine su serpmek', meaning: 'Rahatlatmak.' },
+{ title: 'Yüreğini ferahlatmak', meaning: 'İçini rahatlatmak.' },
+{ title: 'Yüreğini kaldırmak', meaning: 'Dayanmak.' },
+{ title: 'Yüreğini koymak', meaning: 'İşe gönül vermek.' },
+{ title: 'Yüreğini ortaya koymak', meaning: 'Cesurca davranmak.' },
+{ title: 'Yüreğini sıkmak', meaning: 'İçini daraltmak.' },
+{ title: 'Yüreğini titreten', meaning: 'Çok etkileyici.' },
+{ title: 'Yüz akı', meaning: 'Şeref kaynağı.' },
+{ title: 'Yüz bulmak', meaning: 'Cesaret almak.' },
+{ title: 'Yüz çevirmek', meaning: 'İlgiyi kesmek.' },
+{ title: 'Yüz göz olmak', meaning: 'Fazla samimi olmak.' },
+{ title: 'Yüz karası', meaning: 'Utanç kaynağı.' },
+{ title: 'Yüz suyu dökmek', meaning: 'Dilencilik etmek.' },
+{ title: 'Yüzünü kara çıkarmak', meaning: 'Utandırmak.' },
+{ title: 'Yüzü gözü açılmak', meaning: 'Uyanık, açıkgöz olmak.' },
+{ title: 'Yüzü kızarmak', meaning: 'Utanmak.' },
+{ title: 'Yüzü kasap süngeriyle silinmek', meaning: 'Utanmaz olmak.' },
+{ title: 'Yüzü olmamak', meaning: 'Utandığı için yapmaya cesaret edememek.' },
+{ title: 'Yüzü soğuk', meaning: 'Sevimsiz, soğuk davranan.' },
+{ title: 'Yüzü tutmamak', meaning: 'Kendine hakim olamamak.' },
+{ title: 'Yüzü yerinde olmak', meaning: 'Keyifli, neşeli olmak.' },
+{ title: 'Yüzünü ağartmak', meaning: 'Başarılı olup yakınlarını memnun etmek.' },
+{ title: 'Yüzünü ekşitmek', meaning: 'Memnuniyetsizlik göstermek.' },
+{ title: 'Yüzünü kara çıkarmamak', meaning: 'Utanç verici duruma düşürmemek.' },
+{ title: 'Yüzünün akıyla çıkmak', meaning: 'Başarıyla, onuruyla tamamlamak.' },
+{ title: 'Zahmete sokmak', meaning: 'Sıkıntı, yorgunluk vermek.' },
+{ title: 'Zahmet çekmek', meaning: 'Sıkıntı, yorgunluk duymak.' },
+{ title: 'Zararı yok', meaning: 'Önemli değil, sakıncası yok.' },
+{ title: 'Zehir etmek', meaning: 'Keyfini kaçırmak.' },
+{ title: 'Zehir zemberek', meaning: 'Çok acı, ağır (söz).' },
+{ title: 'Zembereği boşanmak', meaning: 'Durup dinlenmeden gülmek.' },
+{ title: 'Zerre kadar', meaning: 'Çok az, en ufak.' },
+{ title: 'Zevahiri kurtarmak', meaning: 'Görevini yapmış görünmek.' },
+{ title: 'Zevkine varmak', meaning: 'Tadını çıkarmak.' },
+{ title: 'Zevkten dört köşe olmak', meaning: 'Çok sevinmek.' },
+{ title: 'Zıvanadan çıkmak', meaning: 'Çıldırmak, aşırı öfkelenmek.' },
+{ title: 'Zihnini kurcalamak', meaning: 'Sürekli düşünmek.' },
+{ title: 'Zil takıp oynamak', meaning: 'Çok sevinmek.' },
+{ title: 'Zilleri takıp oynamak', meaning: 'Büyük sevinç duymak.' },
+{ title: 'Ziyade olsun', meaning: 'Çok olsun (iyi dilek).' },
+{ title: 'Zoruna gitmek', meaning: 'Gücüne gitmek, gücendirmek.' },
+{ title: 'Züğürt tesellisi', meaning: 'Avutucu, inandırıcı olmayan söz.' },
+{ title: 'Zılgıt yemek', meaning: 'Azar işitmek, paylanmak.' }
+];
+// İsterseniz: Buraya dosyanızdaki tüm deyimleri (v2) yapıştırın.
+
+/* ============== DURUM ============== */
+let pool = [...ALL_DATA];           // karıştırılmış havuz
+let currentSet = [];                // aktif set (10 deyim)
+let setIndex = 1;                   // 1,2,3...
+let answers = new Map();            // key: title, value: { chosen, correct, isCorrect }
+let finishedSets = [];              // rapor listesi
+const PER_SET = 10;
+
+/* ============== ELEMANLAR ============== */
+const studentEl = document.getElementById('student');
+const startBtn = document.getElementById('startBtn');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const finishSetBtn = document.getElementById('finishSetBtn');
+const nextSetBtn = document.getElementById('nextSetBtn');
+const resetBtn = document.getElementById('resetBtn');
+const setInfo = document.getElementById('setInfo');
+const list = document.getElementById('list');
+const setNo = document.getElementById('setNo');
+const liveScore = document.getElementById('liveScore');
+const reports = document.getElementById('reports');
+const modalRoot = document.getElementById('modalRoot');
+
+/* ============== YARDIMCILAR ============== */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function pickRandom(arr, n){
+  const c=[...arr];
+  shuffle(c);
+  return c.slice(0,n);
+}
+function ensureName(){
+  if(!studentEl.value.trim()){
+    alert('Lütfen öğrenci ad soyad girin.');
+    studentEl.focus();
+    return false;
+  }
+  return true;
+}
+
+/* ============== MODAL ============== */
+function openQuestion(item){
+  const other = pickRandom(ALL_DATA.filter(x=>x.title!==item.title), 2).map(x=>x.meaning);
+  const options = shuffle([item.meaning, ...other]);
+
+  modalRoot.innerHTML = `
+    <div class="modal-backdrop" onclick="void(0)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <h2>${item.title}</h2>
+        <div class="options">
+          ${options.map((o,i)=>`<div class="option" data-i="${i}">${o}</div>`).join('')}
+        </div>
+        <div class="row">
+          <button class="small ghost" id="closeBtn">Kapat</button>
+        </div>
+      </div>
+    </div>
+  `;
+  modalRoot.style.display='block';
+
+  const optEls = modalRoot.querySelectorAll('.option');
+  optEls.forEach((el)=>{
+    el.addEventListener('click', ()=>{
+      const chosen = el.textContent.trim();
+      const correct = item.meaning.trim();
+      const isCorrect = chosen===correct;
+      // stile boya
+      optEls.forEach(o=>o.classList.remove('correct-answer','wrong-answer'));
+      if(isCorrect){
+        el.classList.add('correct-answer');
+      }else{
+        el.classList.add('wrong-answer');
+        // doğru cevabı da vurgula
+        const idx = options.findIndex(x=>x===correct);
+        if(idx>-1){ optEls[idx].classList.add('correct-answer'); }
+      }
+      // kaydet
+      answers.set(item.title, { chosen, correct, isCorrect });
+      updateLiveScore();
+      // Kısa gecikme sonra kapat
+      setTimeout(()=>{ closeModal(); }, 700);
+    });
+  });
+
+  modalRoot.querySelector('#closeBtn').onclick = closeModal;
+}
+function closeModal(){ modalRoot.style.display='none'; modalRoot.innerHTML=''; }
+
+/* ============== SET OLUŞTURMA / ÇİZİM ============== */
+function startSet(){
+  if(!ensureName()) return;
+  if(pool.length<PER_SET){
+    // havuz biterse tazele
+    pool=[...ALL_DATA];
+  }
+  currentSet = pickRandom(pool, PER_SET);
+  // havuzdan çıkar
+  const titles = new Set(currentSet.map(x=>x.title));
+  pool = pool.filter(x=>!titles.has(x.title));
+  answers.clear();
+
+  setNo.textContent = setIndex;
+  setInfo.textContent = `Set ${setIndex} — ${PER_SET} deyim. Deyime tıklayıp 3 seçenekten birini işaretleyin.`;
+  list.innerHTML = '';
+  currentSet.forEach((it, i)=>{
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML = `
+      <div class="title">${i+1}. ${it.title}</div>
+      <div class="hint">Cevaplanmadı</div>
+    `;
+    card.onclick=()=>openQuestion(it);
+    list.appendChild(card);
+  });
+  updateLiveScore();
+}
+function updateLiveScore(){
+  const total = currentSet.length;
+  let correct = 0, answered = 0;
+  currentSet.forEach(it=>{
+    const rec = answers.get(it.title);
+    const card = list.children.item(currentSet.indexOf(it));
+    const hint = card.querySelector('.hint');
+    if(rec){
+      answered++;
+      if(rec.isCorrect){ correct++; hint.textContent='Doğru'; hint.style.color= 'var(--ok)'; }
+      else{ hint.textContent='Yanlış'; hint.style.color='var(--no)'; }
+    }else{
+      hint.textContent='Cevaplanmadı'; hint.style.color='var(--muted)';
+    }
+  });
+  liveScore.textContent = `Cevaplanan: ${answered}/${total} • Doğru: ${correct}`;
+}
+
+/* ============== RAPOR ============== */
+function finishSet(){
+  if(!ensureName()) return;
+  if(currentSet.length===0){ alert('Önce bir set başlatın.'); return; }
+
+  // skor ve yanlışlar
+  let correct=0, wrongList=[];
+  currentSet.forEach(it=>{
+    const rec = answers.get(it.title);
+    if(rec && rec.isCorrect) correct++;
+    if(!rec || !rec.isCorrect){ // cevaplanmamış veya yanlış => yanlış say
+      const chosen = rec ? rec.chosen : '(işaretlenmedi)';
+      wrongList.push({ title: it.title, chosen });
+    }
+  });
+
+  // rapor metni (yalnızca yanlış deyimler; doğruya gerek yok)
+  const name = studentEl.value.trim();
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2,'0');
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const yyyy = now.getFullYear();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mi = String(now.getMinutes()).padStart(2,'0');
+
+  const header = `Öğrenci: ${name}\nSet: ${setIndex}\nTarih: ${dd}.${mm}.${yyyy} ${hh}:${mi}\nPuan: ${correct}/${PER_SET}`;
+  const wrongText = wrongList.length
+    ? wrongList.map((w,i)=>`${i+1}) ${w.title}${w.chosen && w.chosen!=='(işaretlenmedi)' ? ` — (işaretlenen: ${w.chosen})` : ''}`).join('\n')
+    : 'Yanlış yok.';
+
+  const fullReport = `${header}\n\nYanlış Yapılan Deyimler:\n${wrongText}`;
+
+  // sakla ve göster
+  finishedSets.push({ set: setIndex, name, score: `${correct}/${PER_SET}`, report: fullReport });
+
+  const box = document.createElement('div');
+  box.className='report';
+  box.innerHTML = `
+    <h3>Set ${setIndex} Raporu — ${name}</h3>
+    <p class="lead">Yalnızca yanlışlar listelenir. Doğrular dahil edilmez.</p>
+    <pre>${fullReport}</pre>
+    <div class="row">
+      <button class="small" data-copy>Raporu Kopyala</button>
+    </div>
+  `;
+  reports.prepend(box);
+
+  const copyBtn = box.querySelector('[data-copy]');
+  copyBtn.addEventListener('click', async ()=>{
+    try{
+      await navigator.clipboard.writeText(fullReport);
+      copyBtn.textContent='Kopyalandı ✓';
+      setTimeout(()=>copyBtn.textContent='Raporu Kopyala',1200);
+    }catch(e){
+      alert('Kopyalama başarısız. Metni elle seçip kopyalayın.');
+    }
+  });
+}
+
+/* ============== OLAYLAR ============== */
+startBtn.onclick = ()=>{ setIndex=1; startSet(); };
+shuffleBtn.onclick = ()=>{ pool=[...shuffle(ALL_DATA)]; alert('Deyimler karıştırıldı.'); };
+finishSetBtn.onclick = finishSet;
+nextSetBtn.onclick = ()=>{
+  if(!ensureName()) return;
+  if(currentSet.length===0){ startSet(); return; }
+  setIndex++; startSet();
+};
+resetBtn.onclick = ()=>{
+  if(!confirm('Tüm ilerleme sıfırlansın mı?')) return;
+  pool=[...ALL_DATA]; currentSet=[]; answers.clear(); setIndex=1;
+  list.innerHTML=''; setInfo.textContent=''; setNo.textContent='—'; liveScore.textContent='';
+  reports.innerHTML='';
+};
+
+/* ============== OTOMATİK ============== */
+pool = shuffle(pool);
+</script>
+</body>
+</html>
