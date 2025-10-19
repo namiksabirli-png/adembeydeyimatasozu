@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atasözlerimizi Öğrenelim</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .header-text {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .book-cover {
+            width: 120px;
+            height: 160px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            font-weight: normal;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .sound-control {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .sound-control:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .sound-control.muted {
+            background: rgba(231, 76, 60, 0.3);
+        }
+        
+        .home-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .screen {
+            display: none;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .start-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .start-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .start-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .question-container {
+            margin-bottom: 30px;
+        }
+        
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            padding: 15px;
+            background-color: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+        
+        .option:hover {
+            background-color: #d5dbdb;
+        }
+        
+        .correct {
+            background-color: #2ecc71;
+            color: white;
+            border-color: #27ae60;
+        }
+        
+        .incorrect {
+            background-color: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+        }
+        
+        .show-correct {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .disabled {
+            pointer-events: none;
+        }
+        
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 1.3rem;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .next-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .next-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .retry-btn {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        .retry-btn:hover {
+            background-color: #d35400;
+        }
+        
+        .result-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .result-score {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        .wrong-answers {
+            text-align: left;
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .wrong-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #e74c3c;
+        }
+        
+        .wrong-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .wrong-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .wrong-correct {
+            color: #2ecc71;
+        }
+        
+        .wrong-incorrect {
+            color: #e74c3c;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .book-cover {
+                width: 100px;
+                height: 140px;
+                font-size: 0.8rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .start-btn {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            
+            .question {
+                font-size: 1.2rem;
+            }
+            
+            .option {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="book-cover">
+                    <img src="https://namiksabirli-png.github.io/images/deyim_ogrenelim_kapak2.png" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                </div>
+                
+                <div class="header-text">
+                    <h1>Atasözlerimizi Öğrenelim</h1>
+                    <p class="subtitle">İNTERAKTİF QUİZ UYGULAMASI</p>
+                    <p class="description">Türkçe atasözlerini öğrenmek için eğlenceli bir yol</p>
+                </div>
+                
+                <div class="book-cover">
+                     <img src="https://namiksabirli-png.github.io/images/deyim_ogrenelim_kapak2.png" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                </div>
+            </div>
+            
+            <button id="home-btn" class="home-btn" title="Ana Sayfaya Dön">
+                Ana Sayfaya Dön
+            </button>
+            
+            <button id="sound-toggle" class="sound-control" title="Sesi Aç/Kapat">
+                🔊
+            </button>
+        </header>
+        
+        <!-- Ana Ekran -->
+        <div id="main-screen" class="screen active">
+            <h2>Atasözleri Quizine Hoş Geldiniz!</h2>
+            <p style="text-align: center; margin: 20px 0;">Aşağıdaki butonlardan birini seçerek quiz'e başlayabilirsiniz.</p>
+            <div class="start-buttons" id="start-buttons">
+                <button class="start-btn" id="start-10">10 Soruluk Quiz</button>
+                <button class="start-btn" id="start-20">20 Soruluk Quiz</button>
+                <button class="start-btn" id="start-30">30 Soruluk Quiz</button>
+            </div>
+        </div>
+        
+        <!-- Quiz Ekranı -->
+        <div id="quiz-screen" class="screen">
+            <div class="progress">
+                <span id="current-question">Soru 1/10</span>
+                <span id="score">Doğru: 0 | Yanlış: 0</span>
+            </div>
+            <div class="question-container">
+                <div class="question" id="question-text"></div>
+                <div class="options" id="options-container">
+                    <!-- Seçenekler JavaScript ile eklenecek -->
+                </div>
+            </div>
+            <div class="score" id="feedback"></div>
+        </div>
+        
+        <!-- Sonuç Ekranı -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <h2 class="result-title">Quiz Tamamlandı!</h2>
+                <div class="result-score" id="final-score"></div>
+                <div class="action-buttons">
+                    <button id="retry-wrong-btn" class="action-btn retry-btn">Yanlışları Tekrar Sor</button>
+                    <button id="restart-btn" class="action-btn next-btn">Yeni Quiz Başlat</button>
+                </div>
+                <div class="wrong-answers" id="wrong-answers-container">
+                    <h3 class="wrong-title">Yanlış Cevapladığınız Sorular</h3>
+                    <!-- Yanlış cevaplar JavaScript ile eklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script>
+        // ATASÖZLERİ - Buraya verdiğiniz atasözlerini ekleyin
+        const proverbs = [
+            { title: 'Abanın vakti yağmurda belli olur.', meaning: 'Bir şeyin yararı, ihtiyaç duyulduğunda anlaşılır.' },
+  { title: 'Aba vakti aba, yaba vakti yaba.', meaning: 'İhtiyaçlar zamanında ve ucuza karşılanmalı.' },
+  { title: 'Abanın kadri yağmurda bilinir.', meaning: 'Bir şeyin değeri, ona ihtiyaç duyulunca anlaşılır.' },
+  { title: 'Acele ile menzil alınmaz.', meaning: 'Acele etmekle iş daha çabuk bitmez.' },
+  { title: 'Acele yürüyen yolda kalır.', meaning: 'Acele eden, işini şaşırır.' },
+  { title: 'Acı acıyı keser, su sancıyı.', meaning: 'Bir güçlük, başka bir güçle yenilir.' },
+  { title: 'Acı patlıcanı kırağı çalmaz.', meaning: 'Alışkın olan kişiyi benzer kötülükler etkilemez.' },
+  { title: 'Acıkan ne olsa yer, acıyan ne olsa söyler.', meaning: 'Aç olan her yolu dener, canı yanan ağzına geleni söyler.' },
+  { title: 'Acıkmış kudurmuştan beterdir.', meaning: 'Yoksunluk çeken, o şeyi görünce saldırganlaşır.' },
+  { title: 'Acıyan uyumuş, acıkan uyumamış.', meaning: 'Açlığa katlanılmaz.' },
+  { title: 'Aç aman bilmez, çocuk zaman bilmez.', meaning: 'Aç ikna olmaz, çocuk sabredemez.' },
+  { title: 'Aç kurt aslana saldırır.', meaning: 'Aç olan, gözü döner ve güçlüye saldırır.' },
+  { title: 'Aç tavuk kendini arpa ambarında sanır.', meaning: 'Yokluk çeken, olmayacak hayaller kurar.' },
+  { title: 'Açık yaraya tuz ekilmez.', meaning: 'Acısı taze olanın üzüntüsü artırılmamalı.' },
+  { title: 'Adam adama yük değil, can gövdeye mülk değil.', meaning: 'Misafirden yüksünülmez, kalıcı değildir.' },
+  { title: 'Adam adamı bir kez aldatır.', meaning: 'Aldatan bir kez başarır, ikincisinde yakalanır.' },
+  { title: 'Adam olana bir söz yeter.', meaning: 'Anlayışlı kişi için bir kere söylemek yeterlidir.' },
+  { title: 'Adamak kolay, ödemek zordur.', meaning: 'Söz vermek kolay, yerine getirmek zordur.' },
+  { title: 'Adamın yere bakanından, suyun yavaş akanından kork.', meaning: 'Sessiz ve derin kişi tehlikeli olabilir.' },
+  { title: 'Adı çıkmış dokuza, inmez sekize.', meaning: 'Kötü şöhret kolay kolay düzelmez.' },
+  { title: 'Ağaca balta vurmuşlar "sapı bedenimden" demiş.', meaning: 'En yakınların bile kötülük edebilir.' },
+  { title: 'Ağaca çıkan keçinin dala bakan oğlağı olur.', meaning: 'Çocuklar ailelerini örnek alır.' },
+  { title: 'Ağaca dayanma kurur, adama dayanma ölür.', meaning: 'İnsan kendine güvenmeli.' },
+  { title: 'Ağaca çıksa pabucu yerde kalmaz.', meaning: 'Hiçbir engel tanımaz.' },
+  { title: 'Ağacı kurt, insanı dert yer.', meaning: 'Dert, insanı içten içe kemirir.' },
+  { title: 'Ağacın kurdu içinde olur.', meaning: 'Bir topluluğu yıkan, kendi içindekilerdir.' },
+  { title: 'Ağaç kökünden yıkılır.', meaning: 'Bir düzen temelden bozulunca çöker.' },
+  { title: 'Ağaç meyvesi olunca başını aşağı salar.', meaning: 'Bilgili ve erdemli kişi alçakgönüllü olur.' },
+  { title: 'Ağaç ne kadar uzarsa göğe ermez.', meaning: 'İnsanın yükselişi sınırsız değildir.' },
+  { title: 'Ağaç yaşken eğilir.', meaning: 'İnsan küçük yaşta kolay eğitilir.' },
+  { title: 'Ağaçtan maşa olmaz.', meaning: 'Yeteneksiz kişi önemli işte kullanılmaz.' },
+  { title: 'Ağır git ki yol alasın.', meaning: 'Ağır ama emin adımlarla ilerlemek gerekir.' },
+  { title: 'Ağır otur ki bey desinler.', meaning: 'Ağırbaşlı olana saygı gösterilir.' },
+  { title: 'Ağlama ölü için, ağla deli için.', meaning: 'Deli yakınının acısı hiç dinmez.' },
+  { title: 'Ağır kazan geç kaynar.', meaning: 'Tembel geç iş yapar, ağırbaşlı çabuk öfkelenmez.' },
+  { title: 'Ağlamakla yâr ele geçmez.', meaning: 'Özlemekle bir şey elde edilmez, çaba gerekir.' },
+  { title: 'Ağlamayan çocuğa meme vermezler.', meaning: 'Hakkını arayanın işi görülür.' },
+  { title: 'Ağlar gözden, sahte sözden kendini sakın.', meaning: 'Kendini acındıranlardan sakın.' },
+  { title: 'Ağlarsa anam ağlar, gayrısı yalan ağlar.', meaning: 'Sıkıntını yürekten paylaşan sadece annendir.' },
+  { title: 'Ağlayanın malı gülene hayır etmez.', meaning: 'Haksız kazanç, kazananı mutlu etmez.' },
+  { title: 'Ağrısız baş mezarda olur.', meaning: 'Herkesin bir sıkıntısı vardır.' },
+  { title: 'Ağustosta beyni kaynayanın zemheride kazanı kaynar.', meaning: 'Yazın çalışan kışın rahat eder.' },
+  { title: 'Ağustosta gölge kovan zemheride karnın ovar.', meaning: 'Fırsat varken çalışmayan, sonunda aç kalır.' },
+  { title: 'Ağustosun yarısı yaz, yarısı kıştır.', meaning: 'Ağustos ortasında havalar serinler.' },
+  { title: 'Ahbap kusuruna bakan ahbapsız kalır.', meaning: 'Dostların küçük kusurlarına bakılmamalı.' },
+  { title: 'Akacak kan damarda durmaz.', meaning: 'Alın yazısında olan mutlaka başa gelir.' },
+  { title: 'Ak akçe kara gün içindir.', meaning: 'Para, dar günde kullanılmak için biriktirilir.' },
+  { title: 'Ak gün ağartır, kara gün karartır.', meaning: 'Mutluluk dinç, mutsuzluk yıpratıcıdır.' },
+  { title: 'Ak koyun ara koyun geçit başında belli olur.', meaning: 'Kişinin değeri sınavla anlaşılır.' },
+  { title: 'Ak koyunu gören içi dolu yağ sanır.', meaning: 'Dış görünüşe aldanılmamalı.' },
+  { title: 'Ak koyunun kara kuzusu da olur.', meaning: 'İyi aileden kötü çocuk da çıkabilir.' },
+  { title: 'Akıl yaşta değil baştadır.', meaning: 'Akıllı olmak yaşla ilgili değildir.' },
+  { title: 'Akıllı köprü arayıncaya dek deli suyu geçer.', meaning: 'Atak kişi, risk alarak çabuk sonuç alır.' },
+  { title: 'Akılsız başın cezasını ayaklar çeker.', meaning: 'Düşüncesizce davranan, olumsuz sonuçlara katlanır.' },
+  { title: 'Aksak eşekle yüksek dağa çıkılmaz.', meaning: 'Eksik aletle sağlam iş yapılmaz.' },
+  { title: 'Akşamın hayrından sabahın şerri iyidir.', meaning: 'İşler geceye bırakılmamalı.' },
+  { title: 'Al elmaya taş atan çok olur.', meaning: 'Değerli kişilere sataşan çok olur.' },
+  { title: 'Al malın iyisini, çekme kaygısını.', meaning: 'İyi mal alan tasasız kullanır.' },
+  { title: 'Alçak yerde yatma sel alır, yüksek yerde yatma yel alır.', meaning: 'Yaşam tarzı ve arkadaşlar kişiye uygun olmalı.' },
+  { title: 'Alıcı kuşun ömrü az olur.', meaning: 'Saldırganın düşmanı çok olur.' },
+  { title: 'Alışmış kudurmuştan beterdir.', meaning: 'Alışkanlıklardan vazgeçmek zordur.' },
+  { title: 'Allah Halil İbrahim bereketi versin.', meaning: 'Allah bereket versin.' },
+  { title: 'Allah kardeşi kardeş yaratmış, kesesini ayrı yaratmış.', meaning: 'Kimse kimseye yük olmamalı.' },
+  { title: 'Allah kulunu kısmeti ile yaratır.', meaning: 'Herkesin bir geçim yolu vardır.' },
+  { title: 'Allah verirse el getirir, sel getirir, yel getirir.', meaning: 'Allah zengin etmek isterse hiç umulmadık yerden mal gelir.' },
+  { title: 'Allah\'ın bildiği kuldan saklanmaz.', meaning: 'Suç önce Allah\'a karşı işlenir, kuldan saklanmaz.' },
+  { title: 'Alma mazlumun ahını, çıkar aheste aheste.', meaning: 'Kimseye eziyet edip ahını alma, cezasını çekersin.' },
+  { title: 'Almadan vermek Allah\'a mahsustur.', meaning: 'İnsan yaptığı işe karşılık bekler.' },
+  { title: 'Altı olur, yedi olur, hep Allah\'ın dediği olur.', meaning: 'Sonunda Allah\'ın dediği olur.' },
+  { title: 'Altın eşik gümüş eşiğe muhtaç olur.', meaning: 'Zengin de olsa gün gelir fakire muhtaç olabilir.' },
+  { title: 'Altın yerde paslanmaz, taş yağmurdan ıslanmaz.', meaning: 'Değerli kişi/nesne, nerede olursa olsun değerini yitirmez.' },
+  { title: 'Altın yere düşmekle pul olmaz.', meaning: 'Değerli kişi, konumunu kaybetse de değerinden kaybetmez.' },
+  { title: 'Altının kıymetini sarraf bilir.', meaning: 'Değeri, ancak uzmanı anlar.' },
+  { title: 'Aman diyene kılıç kalkmaz.', meaning: 'Teslim olan düşman öldürülmez.' },
+  { title: 'Ana gibi yâr olmaz, Bağdat gibi diyar olmaz.', meaning: 'Ana kadar candan dost yoktur.' },
+  { title: 'Ananın bastığı yavru incinmez.', meaning: 'Annenin acı sözü çocuğuna ağır gelmez.' },
+  { title: 'Anlayana sivrisinek saz, anlamayana davul zurna az.', meaning: 'Anlayışlıyı küçük söz etkiler, anlamayana ne söylense boş.' },
+  { title: 'Araba devrilince yol gösteren çok olur.', meaning: 'İş işten geçtikten sonra öğüt veren çok olur.' },
+  { title: 'Arayan Mevla’sını da bulur, belasını da.', meaning: 'İyiyi arayan iyiye, kötüyü arayan kötüye ulaşır.' },
+  { title: 'Arı bal alacak çiçeği bilir.', meaning: 'İşini bilen, nereye başvuracağını bilir.' },
+  { title: 'Arı söğüdü, akıllı öğüdü sever.', meaning: 'Herkes işine yarayanı benimser.' },
+  { title: 'Arlı arından, huylu huyundan vazgeçmez.', meaning: 'Herkes karakterine göre davranır.' },
+  { title: 'Armudu soy ye, elmayı say ye.', meaning: 'Armut soyulur, elma ölçülü yenir.' },
+  { title: 'Armut dalının dibine düşer.', meaning: 'Kişi önce yakınlarına yararlı olur.' },
+  { title: 'Arpa eken buğday biçmez.', meaning: 'Kötü davranışın karşılığı iyi olmaz.' },
+  { title: 'Asıl azmaz, bal kokmaz.', meaning: 'Soylu kişi/nesne aslını yitirmez.' },
+  { title: 'Aslan yatağından belli olur.', meaning: 'Kişinin oturduğu yer, kişiliğini yansıtır.' },
+  { title: 'Astar bol olmayınca yüze gülmez.', meaning: 'Gerekli şeyler, geniş ölçüde hazırlanmalı.' },
+  { title: 'Aş taşınca kepçeye paha olmaz.', meaning: 'Sıkışık zamanda önemsiz şeyler değerlenir.' },
+  { title: 'At, adımına göre değil adamına göre yürür.', meaning: 'İşin gidişi, iş başındakinin becerisine bağlıdır.' },
+  { title: 'At binenin, kılıç kuşananın.', meaning: 'Her şey, onu kullanmasını bilene yakışır.' },
+  { title: 'At bulunur meydan bulunmaz, meydan bulunur at bulunmaz.', meaning: 'İş için gerekli koşullar her zaman bir arada olmaz.' },
+  { title: 'Atasını tanımayan Allah\'ını tanımaz.', meaning: 'Babaya itaat etmeyen, Allah\'ı tanımıyor demektir.' },
+  { title: 'Ateş düştüğü yeri yakar.', meaning: 'Acıyı, sadece çeken anlar.' },
+  { title: 'Ava giden avlanır.', meaning: 'Başkasına zarar vermeye çalışan, kendisi zarar görür.' },
+  { title: 'Avcı ne kadar hile bilse ayı o kadar yol bilir.', meaning: 'Karşı taraf da kendini korumak için önlem alır.' },
+  { title: 'Ayağını yorganına göre uzat.', meaning: 'Giderini gelirine uydur.' },
+  { title: 'Ayağının bastığı yerde ot bitmez.', meaning: 'Uğursuzluk getirir.' },
+  { title: 'Az tamah çok ziyan getirir.', meaning: 'Hırslı ve pinti insan zarar eder.' },
+  { title: 'Az veren candan, çok veren maldan.', meaning: 'Fakirin az yardımı, zenginin çok yardımından değerlidir.' },
+  { title: 'Baba malı tez tükenir, evlat gerek kazana.', meaning: 'Gerçek mal, kişinin kendi kazandığıdır.' },
+  { title: 'Baca eğri de olsa dumanı doğru çıkar.', meaning: 'Doğru kişi, elverişsiz ortamda da doğru kalır.' },
+  { title: 'Bacak kadar boyu var, türlü türlü huyu var.', meaning: 'Küçük yaşta birçok huy edinmiş.' },
+  { title: 'Bağa bak, üzüm olsun, yemeye yüzün olsun.', meaning: 'Karşılık beklenen işe yatırım yapılmalı.' },
+  { title: 'Bağı ağlayanın yüzü güler.', meaning: 'Özen gösterilen işten olumlu sonuç alınır.' },
+  { title: 'Baht olmayınca başta, ne kuruda biter ne yaşta.', meaning: 'Talihsiz olan hiçbir işte başarılı olamaz.' },
+  { title: 'Bakarsan bağ olur, bakmazsan dağ olur.', meaning: 'Bakılan şeyden yararlanılır, bakımsız kalan harap olur.' },
+  { title: 'Bal bal demekle ağız tatlanmaz.', meaning: 'Sözle değil, eylemle sonuç alınır.' },
+  { title: 'Bal tutan parmağını yalar.', meaning: 'İmkanı olan, o imkandan az da olsa yararlanır.' },
+  { title: 'Balı parmağı uzun yemez, kısmetlisi yer.', meaning: 'Güzel şey, onu hak edenin olur.' },
+  { title: 'Balık baştan avlanır.', meaning: 'Bir şeyi ele geçirmek için yöneticileri elde etmek gerekir.' },
+  { title: 'Balık baştan kokar.', meaning: 'Bozukluk yöneticilerden kaynaklanır.' },
+  { title: 'Bal olan yerde sinek de olur.', meaning: 'Güzel şeyin çevresinde asalaklar dolaşır.' },
+  { title: 'Balta değmedik ağaç olmaz.', meaning: 'Zarar görmeyen kimse yoktur.' },
+  { title: 'Baskıdaki altından askıdaki salkım yeğdir.', meaning: 'Kullanılan değersiz şey, kullanılmayan değerli şeyden iyidir.' },
+  { title: 'Başa gelmeyince bilinmez.', meaning: 'Felaketi yaşamayan, başkasının acısını tam anlayamaz.' },
+  { title: 'Bedava sirke baldan tatlıdır.', meaning: 'Masrafsız elde edilen şey hoş gelir.' },
+  { title: 'Benim oğlum bina okur, döner döner yine okur.', meaning: 'Çok çalışır ama bir türlü ilerleyemez.' },
+  { title: 'Beş parmağın hangisini kessen acımaz.', meaning: 'Evlatların hepsi aynı derecede sevilir.' },
+  { title: 'Bezi herkesin arşınına göre vermezler.', meaning: 'Genel kurallar kişi isteklerine göre değişmez.' },
+  { title: 'Bıçak kınını kesmez.', meaning: 'Kötüler, kendilerine yarar sağlayandan kötülük etmekten çekinir.' },
+  { title: 'Bilmemek ayıp değil, öğrenmemek ayıp.', meaning: 'Bilmediğini sormadan yapmaya kalkmak ayıptır.' },
+  { title: 'Bin bilsen de bir bilene danış.', meaning: 'Her zaman senden daha iyi bilen vardır.' },
+  { title: 'Bin nasihatten bir musibet yeğdir.', meaning: 'Yaşanan olay, öğütten daha etkilidir.' },
+  { title: 'Bin tasa bir borç ödemez.', meaning: 'Üzülmek borcu ödemez.' },
+  { title: 'Bir adama kırk gün ne dersen o olur.', meaning: 'Sürekli telkinle kişi etkilenebilir.' },
+  { title: 'Bir çöplükte iki horoz ötmez.', meaning: 'Bir yerde iki baş olmaz.' },
+  { title: 'Bir baş soğan bir kazanı kokutur.', meaning: 'Kötü bir kişi/davranış, topluluğun havasını bozar.' },
+  { title: 'Bir elin nesi var, iki elin sesi var.', meaning: 'Birlikten güç doğar.' },
+  { title: 'Bir fincan kahvenin kırk yıl hatırı vardır.', meaning: 'Küçük iyilikler unutulmaz.' },
+  { title: 'Bir kızı bin kişi ister, bir kişi alır.', meaning: 'Bir şeyi herkes ister ama bir kişi alır.' },
+  { title: 'Bir koltuğa iki karpuz sığmaz.', meaning: 'Aynı anda birden fazla işle ilgilenilmez.' },
+  { title: 'Bir mıh bir nal kurtarır, bir nal bir at kurtarır.', meaning: 'Küçük şeyler büyük sonuçlar doğurabilir.' },
+  { title: 'Biri bilmeyen bini hiç bilmez.', meaning: 'Küçük iyiliğin değerini bilmeyen, büyüğe layık değildir.' },
+  { title: 'Bir söz yola getirir, bir söz yoldan çıkarır.', meaning: 'Sözün iyisi de kötüsü de etkilidir.' },
+  { title: 'Biz kırk kişiyiz, birbirimizi biliriz.', meaning: 'Birbirimizi çok iyi tanırız.' },
+  { title: 'Boğaz dokuz boğumdur.', meaning: 'Söz söylemeden önce iyi düşünmek gerekir.' },
+  { title: 'Borcun iyisi vermek, derdin iyisi ölmek.', meaning: 'Borç ve dert ancak bu şekilde biter.' },
+  { title: 'Borç ödemekle, yol yürümekle tükenir.', meaning: 'Büyük işler, azar azar yapılarak bitirilir.' },
+  { title: 'Borç yiğidin kamçısıdır.', meaning: 'Borç, kişiyi daha çok çalışmaya iter.' },
+  { title: 'Borçlu ölmez, benzi sararır.', meaning: 'Borç kişiyi hasta eder ama öldürmez.' },
+  { title: 'Bostana dadanan eşeğin kuyruğu, kulağı olmaz.', meaning: 'Hırsızlık yapan ceza alır ve itibarını kaybeder.' },
+  { title: 'Boş gezmekten bedava çalışmak yeğdir.', meaning: 'Çalışmak tembellikten iyidir.' },
+  { title: 'Boşa koysan dolmaz, doluya koysan almaz.', meaning: 'İçinden çıkılamayan durum.' },
+  { title: 'Bu ne perhiz bu ne lahana turşusu!', meaning: 'Söz ve davranış çelişkisi.' },
+  { title: 'Buğdayım var deme ambara girmeyince, oğlum var deme yoksulluğa ermeyince.', meaning: 'Bir şeyin senin olduğundan emin olmak için her koşul gerçekleşmeli.' },
+  { title: 'Burnunu sıksan canı çıkacak.', meaning: 'Çok zayıf ve güçsüz.' },
+  { title: 'Bülbülü altın kafese koymuşlar, ah vatanım demiş.', meaning: 'Kişi öz vatanını özler.' },
+  { title: 'Büyük başın derdi büyük olur.', meaning: 'Büyük işlerin başındakilerin sorunları da büyük olur.' },
+  { title: 'Büyük lokma ye büyük söz söyleme.', meaning: 'Yapamayacağın konuda kesin söz söyleme.' },
+  { title: 'Can boğazdan gelir.', meaning: 'İnsan yemekle güçlenir, yemeden yaşanmaz.' },
+  { title: 'Can canın yoldaşıdır.', meaning: 'İnsan yalnız yaşayamaz, arkadaş arar.' },
+  { title: 'Can çıkmayınca huy çıkmaz.', meaning: 'İnsanı huylarından vazgeçirmek zordur.' },
+  { title: 'Cana gelecek mala gelsin.', meaning: 'Canı korumak için mal feda edilir.' },
+  { title: 'Canımı sokakta bulmadım.', meaning: 'Tehlikeye veya sıkıntıya girmeye niyetim yok.' },
+  { title: 'Cefayı çekmeyen sefanın kadrini bilmez.', meaning: 'Sıkıntı çekmeyen, rahatlığın değerini bilemez.' },
+  { title: 'Cins kedi ölüsünü göstermez.', meaning: 'Onurlu kişi kötü durumunu göstermez.' },
+  { title: 'Cömert derler maldan ederler, yiğit derler candan ederler.', meaning: 'Poşpohlamalara kananlar mallarından ve canlarından olur.' },
+  { title: 'Çağrılan yere erinme, çağrılmayan yere görünme.', meaning: 'Çağrıldığın yere git, çağrılmadığın yere gitme.' },
+  { title: 'Çağrılmayan yere çörekçiyle börekçi gider.', meaning: 'Çağrılmadığın yere gitme.' },
+  { title: 'Çalma elin kapısını, çalarlar kapını.', meaning: 'Kimseye kötülük yapma, yoksa aynısını görürsün.' },
+  { title: 'Çam ağacından ağıl olmaz, el çocuğundan oğul olmaz.', meaning: 'Her şeyin yeri ve işlevi ayrıdır.' },
+  { title: 'Çanağa ne doğrarsan kaşığında o çıkar.', meaning: 'Gelecekte, bugünkü emeğinin karşılığını alırsın.' },
+  { title: 'Çay geçerken at değiştirilmez.', meaning: 'Tehlikeli zamanda yöntem değiştirilmez.' },
+  { title: 'Çıkmadık canda umut var.', meaning: 'İlişki tamamen kesilmemişse umut vardır.' },
+  { title: 'Çıngıraklı deve kaybolmaz.', meaning: 'Kalıcı eser bırakan unutulmaz.' },
+  { title: 'Çivi çıkar ama yeri kalır.', meaning: 'Gönül yarası unutulmaz.' },
+  { title: 'Çivi çiviyi söker.', meaning: 'Güçlü bir şey, başka bir güçle etkisiz hale getirilir.' },
+  { title: 'Çobanın gönlü olursa tekeden süt çıkarır.', meaning: 'İsteyen, imkansız gibi görüneni başarır.' },
+  { title: 'Çobansız koyunu kurt kapar.', meaning: 'Yöneticisi olmayan topluluğu düşman ezer.' },
+  { title: 'Çocuğu iş buyuran, ardınca kendi gider.', meaning: 'Çocuğa iş veren, arkasından gitmelidir.' },
+  { title: 'Çocuğun bulunduğu yerde dedikodu olmaz.', meaning: 'Çocukla uğraşmaktan dedikoduya vakit olmaz.' },
+  { title: 'Çocuk düşe kalka büyür.', meaning: 'Çocuğun düşe kalka büyümesi normaldir.' },
+  { title: 'Çoğu gitti, azı kaldı.', meaning: 'İşin en zor kısmı bitti.' },
+  { title: 'Çoğu zarar, azı karar.', meaning: 'Hiçbir şeyde aşırıya kaçılmamalı.' },
+  { title: 'Çok bilen çok yanılır.', meaning: 'Çok bilen, bilmediği konularda da yanılır.' },
+  { title: 'Çok gezen tavuk ayağında pislik getirir.', meaning: 'Gezen kişi, kötü alışkanlıklar edinebilir.' },
+  { title: 'Çok havlayan köpek ısırmaz.', meaning: 'Bağırıp çağıran, eyleme geçmez.' },
+  { title: 'Çok naz âşık usandırır.', meaning: 'Nazlanmada aşırıya kaçılmamalı.' },
+  { title: 'Çok söyleme arsız edersin, aç bırakma hırsız edersin.', meaning: 'Sürekli uyarı ve yoksunluk kötü sonuç verir.' },
+  { title: 'Çok yaşayan bilmez, çok gezen bilir.', meaning: 'Çok gezen, çok yaşayandan daha çok şey bilebilir.' },
+  { title: 'Çul içinde aslan yatar.', meaning: 'Kişinin değeri kıyafetiyle değil, kişiliğiyle ölçülür.' },
+  { title: 'Dağ başından duman eksik olmaz.', meaning: 'Büyük insanların sürekli sıkıntıları vardır.' },
+  { title: 'Dağ dağ üstüne olur, ev ev üstüne olmaz.', meaning: 'Aynı evde iki aile anlaşamaz.' },
+  { title: 'Dağ dağa kavuşmaz, insan insana kavuşur.', meaning: 'İnsanlar bir gün mutlaka karşılaşır.' },
+  { title: 'Dağ ne kadar yüce olsa yol üstünden aşar.', meaning: 'Zorlukların da üstesinden gelinir.' },
+  { title: 'Dam üstünde saksağan, vur beline kazmayı.', meaning: 'Yersiz ve saçma sözler karşısında söylenir.' },
+  { title: 'Damdan düşen, damdan düşenin hâlini bilir.', meaning: 'Aynı acıyı çeken, başkasının acısını anlar.' },
+  { title: 'Damlaya damlaya göl olur.', meaning: 'Küçük şeyler birikerek büyük olur.' },
+  { title: 'Danışan dağı aşmış, danışmayan düz yolda şaşmış.', meaning: 'Bilene soran zor işi başarır, sormayan şaşırır.' },
+  { title: 'Davetsiz gelen döşeksiz oturur.', meaning: 'Çağrılmadan giden iyi karşılanmaz.' },
+  { title: 'Davul dengi dengine diye çalar.', meaning: 'Evlenecekler birbirine denk olmalı.' },
+  { title: 'Davulun sesi uzaktan hoş gelir.', meaning: 'İşin içinde olmayan, o işi kolay sanır.' },
+  { title: 'Değirmenin suyu nereden geliyor?', meaning: 'Bu işin masrafı nasıl karşılanıyor?' },
+  { title: 'Delik büyük, yama küçük.', meaning: 'Eldeki imkanlar yetersiz.' },
+  { title: 'Demir nemden, insan gamdan çürür.', meaning: 'Üzüntü insanı yıpratır.' },
+  { title: 'Demir tavında dövülür.', meaning: 'Her iş zamanında yapılır.' },
+  { title: 'Deniz kenarında dalga eksik olmaz.', meaning: 'Hareketli ortamda çatışma çıkması doğaldır.' },
+  { title: 'Denizdeki balığın pazarlığı olmaz.', meaning: 'Henüz elde olmayan şeyin alım satımı konuşulmaz.' },
+  { title: 'Denize düşen yılana sarılır.', meaning: 'Çaresiz kalan, her çareye başvurur.' },
+  { title: 'Derdini söylemeyen derman bulamaz.', meaning: 'Sıkıntısını anlatan çözüm bulur.' },
+  { title: 'Derdi veren devasını da verir.', meaning: 'Her sıkıntının bir çaresi vardır.' },
+  { title: 'Dereyi geçerken at değiştirilmez.', meaning: 'Tehlikeli durumda yöntem değiştirilmez.' },
+  { title: 'Dert ağlatır, aşk söyletir.', meaning: 'Dertli ağlar, âşık söylenir.' },
+  { title: 'Dervişin fikri ne ise zikri de odur.', meaning: 'İnsan, düşündüğünü konuşur.' },
+  { title: 'Destursuz bağa gireni sopa ile kovarlar.', meaning: 'İzinsiz girilen yerden veya işten kovulur.' },
+  { title: 'Deveyi yardan uçuran bir tutam ottur.', meaning: 'Hırslı insan, küçük çıkar için her şeyini kaybeder.' },
+  { title: 'Dışı eli yakar, içi beni yakar.', meaning: 'Görünüşe aldanmamalı.' },
+  { title: 'Dikensiz gül olmaz.', meaning: 'İyi/güzel şeyin de sıkıntılı yanı vardır.' },
+  { title: 'Dilden gelen elden gelse her fukara padişah olur.', meaning: 'İnsan her istediğini yapamaz.' },
+  { title: 'Dilsizin dilinden anası anlar.', meaning: 'Onunla sürekli uğraşan, onu en iyi anlar.' },
+  { title: 'Doğru söz acıdır.', meaning: 'Gerçekler, eleştirilen kişiye acı gelir.' },
+  { title: 'Doğrunun yardımcısı Allah\'tır.', meaning: 'Doğru kişiye Allah yardım eder.' },
+  { title: 'Doluya koydum almadı, boşa koydum dolmadı.', meaning: 'İçinden çıkılamayan durum.' },
+  { title: 'Dost acı söyler.', meaning: 'Dost, eksikleri yüzüne söyler.' },
+  { title: 'Dost ağlatır, düşman güldürür.', meaning: 'Dostun acı sözü iyiliğin içindir.' },
+  { title: 'Dost başa, düşman ayağa bakar.', meaning: 'İyi görünmek için temiz giyinmek gerekir.' },
+  { title: 'Dostun attığı taş baş yarmaz.', meaning: 'Dostun acı sözü veya davranışı incitmez.' },
+  { title: 'Dostluk okkayla, alışveriş dirhemle.', meaning: 'Dostluk ölçülemez, alışveriş ölçülü olmalı.' },
+  { title: 'Dün öleni dün gömerler.', meaning: 'Üzüntü sürdürülmemeli, unutulmaya çalışılmalı.' },
+  { title: 'Ecel geldi cihana, baş ağrısı bahane.', meaning: 'Her ölümün bir sebebi vardır.' },
+  { title: 'Eğilen baş kesilmez.', meaning: 'Özür dileyen bağışlanmalı.' },
+  { title: 'Eğreti ata binen tez iner.', meaning: 'Ödünç araçla iş yürütülemez.' },
+  { title: 'Eğri oturup doğru konuşalım.', meaning: 'Doğruyu söylemek gerekir.' },
+  { title: 'Ekmek aslanın ağzında.', meaning: 'Geçim sağlamak zordur.' },
+  { title: 'Ekmek istemez su istemez.', meaning: 'Hiç masrafı yoktur.' },
+  { title: 'El için ağlayan gözden olur.', meaning: 'Başkası için yapılan fedakarlığın sınırı vardır.' },
+  { title: 'El kazanıyla aş kaynamaz.', meaning: 'Önemli iş başkasının yardımıyla yapılamaz.' },
+  { title: 'Elçiye zeval olmaz.', meaning: 'Elçi, getirdiği haberden sorumlu tutulmaz.' },
+  { title: 'Elin ağzı torba değil ki büzesin.', meaning: 'Başkalarının söylemesine engel olamazsın.' },
+  { title: 'Elmanın dibi göl, armudun dibi yol.', meaning: 'Her şeye aynı davranılmaz, özelliğine göre hareket edilir.' },
+  { title: 'Emek olmadan yemek olmaz.', meaning: 'Çalışmadan kazanılmaz.' },
+  { title: 'Erkeğin kalbine giden yol midesinden geçer.', meaning: 'Erkeği yemekle mutlu edebilirsin.' },
+  { title: 'Erken kalkan yol alır.', meaning: 'Erken başlayan kazançlı çıkar.' },
+  { title: 'Eski düşman dost olmaz, yenisinden vefa gelmez.', meaning: 'Eski düşmanlık dostluğa dönmez, yeni düşmandan iyilik beklenmez.' },
+  { title: 'Eskisi olmayanın yenisi olmaz.', meaning: 'Yeniyi alırken eskisi de elde tutulmalı.' },
+  { title: 'Eşeğe altın semer vursalar yine eşektir.', meaning: 'Değersiz kişi, makamla değerlenmez.' },
+  { title: 'Eşek, kulağı kesilmekle küheylan olmaz.', meaning: 'Biçim değiştirmekle öz değişmez.' },
+  { title: 'Etle tırnak arasına girilmez.', meaning: 'Aile anlaşmazlığında taraf tutulmaz.' },
+  { title: 'Etme bulma dünyası.', meaning: 'Kötülük eden kötülük bulur.' },
+  { title: 'Ev alma, komşu al.', meaning: 'İyi komşu çok önemlidir.' },
+  { title: 'Evdeki hesap çarşıya uymaz.', meaning: 'Planlanan iş, umulduğu gibi sonuçlanmaz.' },
+  { title: 'Evden bir ölü çıkacak demişler, herkes hizmetçinin yüzüne bakmış.', meaning: 'Zor işi, söz geçirilebilen yapar.' },
+  { title: 'Evlinin bir evi var, kiracının bin evi var.', meaning: 'Ev sahibi kendi evinde, kiracı istediği evde oturur.' },
+  { title: 'Fakirlik ayıp değil, tembellik ayıp.', meaning: 'Yoksulluk değil, çalışmamak ayıptır.' },
+  { title: 'Fukaranın tavuğu tek tek yumurtlar.', meaning: 'Şans fakire gülmez.' },
+  { title: 'Garibe bir selam bin altın değer.', meaning: 'Yabancı yerde gösterilen küçük ilgi çok değerlidir.' },
+  { title: 'Garip kuşun yuvasını Allah yapar.', meaning: 'Kimsesize Allah yardım eder.' },
+  { title: 'Geç olsun da güç olmasın.', meaning: 'İşin geç bitmesi, zor bitmesinden iyidir.' },
+  { title: 'Gel demesi kolay ama git demesi güçtür.', meaning: 'Birini işe almak/çağırmak kolay, işten atmak/kovmak zordur.' },
+  { title: 'Gelen gideni aratır.', meaning: 'Yeni gelen, eskisinden daha kötü olabilir.' },
+  { title: 'Gelene git denilmez.', meaning: 'Kendiliğinden gelen konuk geri çevrilmez.' },
+  { title: 'Gelini ata bindirmiş ‘ya nasip’ demiş.', meaning: 'Kesin sonuç alınmadan işe olup bitti gözüyle bakılmaz.' },
+  { title: 'Gençliğin kıymeti ihtiyarlıkta bilinir.', meaning: 'Gençliğin değeri yaşlanınca anlaşılır.' },
+  { title: 'Gidilmeyen yer senin değildir.', meaning: 'Kullanılmayan malın sana yararı yoktur.' },
+  { title: 'Gidip de gelmemek var, gelip de görmemek var.', meaning: 'Giden dönmeyebilir, dönen bıraktıklarını bulamayabilir.' },
+  { title: 'Gönül bir sırça saraydır, kırılırsa yapılmaz.', meaning: 'Gönül kırılmamalı, kolay onarılmaz.' },
+  { title: 'Güneş balçıkla sıvanmaz.', meaning: 'Gerçek, yalanla örtbas edilemez.' },
+  { title: 'Güneş girmeyen eve doktor girer.', meaning: 'Güneşsiz ev sağlıksızdır.' },
+  { title: 'Hacı hacıyı Mekke’de, derviş dervişi tekkede bulur.', meaning: 'Aynı amaçtaki kişiler bir araya gelir.' },
+  { title: 'Haddini bilmeyene bildirirler.', meaning: 'Haddini aşana haddi bildirilir.' },
+  { title: 'Hak deyince akan sular durur.', meaning: 'Adalet karşısında kimsenin söyleyecek sözü kalmaz.' },
+  { title: 'Hak yerini bulur.', meaning: 'Haksızlık er geç ortaya çıkar.' },
+  { title: 'Hamama giren terler.', meaning: 'Bir işe giren, o işin güçlüklerine katlanmalı.' },
+  { title: 'Hangi rüzgâr attı?', meaning: 'Beklenmedik zamanda gelenlere sitem.' },
+  { title: 'Hastaya bakmaktan hasta olması yeğdir.', meaning: 'Ağır hastaya bakmak çok zordur.' },
+  { title: 'Hastaya döşek sorulmaz.', meaning: 'Olmazsa olmaz şey sorulmaz.' },
+  { title: 'Hatasız kul olmaz.', meaning: 'Her insan hata yapar.' },
+  { title: 'Hekimden sorma, çekenden sor.', meaning: 'Acıyı çeken bilir.' },
+  { title: 'Her ağacın meyvesi olmaz.', meaning: 'Her dışarıdan verimli görünen verimli olmaz.' },
+  { title: 'Her ağaçtan kaşık olmaz.', meaning: 'Her kişi her işte kullanılamaz.' },
+  { title: 'Her gün baklava börek yense bıkılır.', meaning: 'Hep aynı şey bıkkınlık verir.' },
+  { title: 'Her horoz kendi çöplüğünde öter.', meaning: 'Herkes kendi çevresinde söz sahibidir.' },
+  { title: 'Her işte bir hayır vardır.', meaning: 'Olan biten hayra yorulmalı.' },
+  { title: 'Her kaşığın kısmeti bir olmaz.', meaning: 'Herkesin talihi aynı değildir.' },
+  { title: 'Her kuşun eti yenmez.', meaning: 'Herkes zorbalığa boyun eğmez.' },
+  { title: 'Her yiğidin bir yoğurt yiyişi vardır.', meaning: 'Herkesin kendine özgü iş yapma biçimi vardır.' },
+  { title: 'Herkes aklını pazara çıkarmış, yine kendi aklını almış.', meaning: 'İnsan kendi aklını beğenir.' },
+  { title: 'Herkes bildiğini okur.', meaning: 'Herkes kendi düşüncesine göre hareket eder.' },
+  { title: 'Herkes gider Mersin’e, biz gideriz tersine.', meaning: 'İnsan kendi kusurunu göremez.' },
+  { title: 'Irak yerin haberini kervan getirir.', meaning: 'Ulaşılamayan şeyle ilişkiyi aracı sağlar.' },
+  { title: 'Işığını akşamdan önce yakan sabaha çırasına yağ bulamaz.', meaning: 'Gerekmediği yerde harcayan, gerektiğinde bulamaz.' },
+  { title: 'Irmak kenarında çeşme yapılmaz.', meaning: 'Zaten var olan şeyin yanına aynısını yapmak anlamsızdır.' },
+  { title: 'Islanmışın yağmurdan pervası yoktur.', meaning: 'Zarar gören, aynı zarardan korkmaz.' },
+  { title: 'Ismarlama hac, hac olmaz.', meaning: 'Kişi kendi işini başkasına yaptırmamalı.' },
+  { title: 'İbadet de gizli, kabahat de.', meaning: 'İyilik gösterişsiz, kabahat açığa vurulmamalı.' },
+  { title: 'İki aslan bir posta sığmaz.', meaning: 'Bir yerde iki güçlü kişi barınamaz.' },
+  { title: 'İki at bir kazığa bağlanmaz.', meaning: 'Farklı kişiliktekiler bir arada yaşayamaz.' },
+  { title: 'İki deliye bir uslu koymuşlar.', meaning: 'Kavga edenlerin arasını akıllı bulur.' },
+  { title: 'İki kaptan bir gemiyi batırır.', meaning: 'Bir işi iki kişi yönetemez.' },
+  { title: 'İki el, bir baş için.', meaning: 'Kendi geçimini zar zor sağlayan, başkasına yardım edemez.' },
+  { title: 'İki emini bir yemin aralar.', meaning: 'Birinin yemin etmesi, güvenin sarsıldığını gösterir.' },
+  { title: 'İki kere iki dört eder.', meaning: 'Apaçık gerçek.' },
+  { title: 'İki ölç bir biç.', meaning: 'Bir işe başlamadan önce iyi düşün.' },
+  { title: 'İki testi tokuşunca biri elbet kırılır.', meaning: 'Kavgada taraflardan biri mutlaka zarar görür.' },
+  { title: 'İnsan ayaktan, at tırnaktan kapar.', meaning: 'Hastalık insana ayaktan, ata tırnaktan bulaşır.' },
+  { title: 'İnsan beşer, kuldur şaşar.', meaning: 'İnsan hata yapabilir, hoş görülmeli.' },
+  { title: 'İnsan çeşit çeşit, yer damar damar.', meaning: 'İnsanlar ve topraklar farklı özelliktedir.' },
+  { title: 'İnsan doğduğu yerde değil, doyduğu yerde.', meaning: 'İnsan geçimini sağladığı yeri yurt edinir.' },
+  { title: 'İnsan gönlünün artığını söyler.', meaning: 'Şakada bile içinden geçen söylenir.' },
+  { title: 'İnsan kıymetini insan bilir.', meaning: 'Kişinin değerini ancak değerini anlayabilen bilir.' },
+  { title: 'İnsan konuşa konuşa, hayvan koklaşa koklaşa.', meaning: 'İnsanlar konuşarak anlaşır.' },
+  { title: 'İnsan sözünden, hayvan yularından tutulur.', meaning: 'Kişi söylediği sözden sorumludur.' },
+  { title: 'İnsan yedisinde ne ise yetmişinde de odur.', meaning: 'Kişinin huyu değişmez.' },
+  { title: 'İnsanın alacası içinde, hayvanın alacası dışınadır.', meaning: 'İnsanın iç yüzü belli değildir.' },
+  { title: 'İp inceldiği yerden kopar.', meaning: 'Bir durum en zayıf yerinden bozulur.' },
+  { title: 'İp koptuğu yerden bağlanır.', meaning: 'Kırgınlık, sebebi ortadan kalkarsa giderilir.' },
+  { title: 'İstediğini söyleyen, istemediğini işitir.', meaning: 'Kötü söz söyleyen, aynısını işitir.' },
+  { title: 'İsteyenin bir yüzü, vermeyenin iki yüzü kara.', meaning: 'İsteyen değil, vermeyen utanmalı.' },
+  { title: 'İş insanın aynasıdır.', meaning: 'Kişi, yaptığı işle değerlendirilir.' },
+  { title: 'İş olacağına varır.', meaning: 'Ne yapılırsa yapılsın, sonuç değişmez.' },
+  { title: 'İşin yoksa şahit ol, paran çoksa kefil ol.', meaning: 'Tanıklık boş oturanın, kefillik zenginin işidir.' },
+  { title: 'İşine hor bakan boynuna torba takar.', meaning: 'İşini küçümseyen sonunda dilenci olur.' },
+  { title: 'İşini kış tut da yaz çıkarsa bahtına.', meaning: 'İşe, hep güçlükle karşılaşacakmış gibi başla.' },
+  { title: 'İşleyen demir ışıldar pas tutmaz.', meaning: 'Çalışan kişi gelişir, tembel körelir.' },
+  { title: 'İştah dişin dibindedir.', meaning: 'Yemeye başlayınca iştah açılır.' },
+  { title: 'İyi evlat babayı vezir, kötü evlat rezil eder.', meaning: 'Çocuğun tutumu, babasının itibarını belirler.' },
+  { title: 'İyi olacak hastanın hekim ayağına gelir.', meaning: 'İyileşmek kısmetse, çare kendiliğinden gelir.' },
+  { title: 'İyiliğe iyilik her kişinin kârı, kötülüğe iyilik er kişinin kârı.', meaning: 'Kötülüğe iyilikle karşılık vermek erdemdir.' },
+  { title: 'İyilik eden iyilik bulur.', meaning: 'İyilik yapana iyilik yapılır.' },
+  { title: 'İyilik et denize at, balık bilmezse Halik bilir.', meaning: 'Karşılık beklemeden iyilik yap.' },
+  { title: 'İyilik iki baştan olur.', meaning: 'İyi geçim, iki tarafın da iyi olmasıyla mümkün.' },
+  { title: 'Kabahat samur kürk olsa, kimse sırtına almaz.', meaning: 'Kimse suçunu kabul etmek istemez.' },
+  { title: 'Kaçanı kovmazlar, yıkılanı vurmazlar.', meaning: 'Kaçan düşman kovalanmaz, âciz olan vurulmaz.' },
+  { title: 'Kaçanın anası ağlamamış.', meaning: 'Tehlikeden kaçan kurtulmuştur.' },
+  { title: 'Kader olmayınca kadir bilinmez.', meaning: 'Talihsiz kişinin değeri bilinmez.' },
+  { title: 'Kadı anlatışa göre fetva verir.', meaning: 'Haksız, olayı kendini haklı gösterecek şekilde anlatırsa haklı çıkar.' },
+  { title: 'Kalaylı bakır küflenmez.', meaning: 'Temiz kişi/iş lekelenmez.' },
+  { title: 'Kanaat gibi devlet olmaz.', meaning: 'Elindekiyle yetinmek büyük zenginliktir.' },
+  { title: 'Kar kuytuda, para pintide eğleşir.', meaning: 'Her şey saklanabilen yerde ve saklamasını bilenin yanındadır.' },
+  { title: 'Kar ne kadar çok yağsa yaza kalmaz.', meaning: 'Elverişli ortamdaki şeyler, ortam bozulunca yok olur.' },
+  { title: 'Kar susuzluk kandırmaz.', meaning: 'Gerçek ihtiyaç, oyalayıcı şeylerle giderilmez.' },
+  { title: 'Karaya sabun, deliye öğüt neylesin.', meaning: 'Özü bozuk düzeltilemez.' },
+  { title: 'Kardeş kardeşi atmış, yar başına tutmuş.', meaning: 'Kardeşler kötü durumda birbirine yardım eder.' },
+  { title: 'Karga kekliği taklit edeyim derken kendi yürüyüşünü şaşırmış.', meaning: 'Görgüsüz, görgülüyü taklide kalkışsa beceremez, gülünç olur.' },
+  { title: 'Karıncadan ibret al, yazdan kışı karşılar.', meaning: 'Kazanabildiğin zaman, gelecek için birikim yap.' },
+  { title: 'Karıncanın zevali gelince kanatlanır.', meaning: 'Durumunun gerektirdiği davranışın dışına çıkanın sonu kötü olur.' },
+  { title: 'Katrandan olmaz şeker, olsa da cinsine çeker.', meaning: 'Kötü soylu, iyiye dönmez.' },
+  { title: 'Katranı kaynatsan olur mu şeker?', meaning: 'Kişi özünü değiştiremez.' },
+  { title: 'Kavgada kılıç ödün vermez.', meaning: 'Savunma aracı başkasına verilmez.' },
+  { title: 'Kaymağı seven mandayı yanında taşır.', meaning: 'Sevdiği şeyden mahrum kalmak istemeyen, onu sağlayacak aracı bulundurur.' },
+  { title: 'Kaza geliyorum demez.', meaning: 'Kaza ansızın gelir.' },
+  { title: 'Keçi kurttan kurtulsa gergedan olur.', meaning: 'Tehlike olmasa her şey çok gelişirdi.' },
+  { title: 'Keçi nereye çıkarsa oğlağı da oraya çıkar.', meaning: 'Büyükler küçüklere örnek olur.' },
+  { title: 'Keçiye can kaygısı, kasaba yağ kaygısı.', meaning: 'Biri zarardan kıvranırken, diğeri çıkar hesabı yapar.' },
+  { title: 'Kedinin boynuna ciğer asılmaz.', meaning: 'Emanet edilecek kişi güvenilir olmalı.' },
+  { title: 'Kedinin gideceği samanlığa kadar.', meaning: 'Kötü kişinin gideceği yer bellidir, yakayı ele verir.' },
+  { title: 'Kedinin kanadı olsaydı serçenin adı kalmazdı.', meaning: 'Saldırganlar güçlü olsaydı, zayıfları yok ederlerdi.' },
+  { title: 'Kedinin usluluğu sıçan görünceye kadar.', meaning: 'Atılgan kişi, çileden çıkaran durum karşısında sessiz kalmaz.' },
+  { title: 'Kediyi sıkıştırırsan üstüne atılır.', meaning: 'Korkan kişi çok sıkıştırılırsa saldırır.' },
+  { title: 'Kenarın dilberi nazik de olsa nazenin olmaz.', meaning: 'Kibar çevrede yetişmemiş, incelikleri gösteremez.' },
+  { title: 'Kepenek altında er yatar.', meaning: 'Kıyafete bakıp değer biçilmemeli.' },
+  { title: 'Kes parmağını çık pazara, merhem buyuran çok olur.', meaning: 'Dertli kişiye herkes farklı yol gösterir.' },
+  { title: 'Kır atın yanında duran ya huyundan ya suyundan.', meaning: 'Arkadaş, kişiyi etkiler.' },
+  { title: 'Kısmet gökten zembille inmez.', meaning: 'Kısmet çalışmakla elde edilir.' },
+  { title: 'Kısmet ise gelir Hint’ten, kısmet değilse ne gelir elden?', meaning: 'Kısmetinde varsa olur, yoksa olmaz.' },
+  { title: 'Kırk gün taban eti, bir gün av eti.', meaning: 'Avcılık zahmetlidir, sabır gerektirir.' },
+  { title: 'Kırk yıllık Kâni, olur mu Yani.', meaning: 'Alışkanlıklar kolay değişmez.' },
+  { title: 'Kırkından sonra saza başlayan kıyamette çalar.', meaning: 'Yaşlandıktan sonra öğrenilen şey için zaman yetmez.' },
+  { title: 'Kısmetinde ne varsa kaşığına o çıkar.', meaning: 'Kişi alın yazısındakine ulaşır.' },
+  { title: 'Kısmetsiz köpek, sabaha karşı uyuyakalır.', meaning: 'Kısmeti olmayan, fırsatı kaçırır.' },
+  { title: 'Kız kundakta, çeyiz sandıkta.', meaning: 'Kızın çeyizi bebekken hazırlanmaya başlanır.' },
+  { title: 'Kızım sana söylüyorum, gelinim sen anla.', meaning: 'Dolaylı uyarı.' },
+  { title: 'Kimi köprü bulamaz geçmeye, kimi su bulamaz içmeye.', meaning: 'Nasipler farklıdır.' },
+  { title: 'Kimse bilmez kim kazana kim yiye.', meaning: 'Kazanılan malı, hayal edilmeyen kişi yer.' },
+  { title: 'Kişi arkadaşından bellidir.', meaning: 'Kişi, arkadaşına bakılarak değerlendirilebilir.' },
+  { title: 'Kişi ne yaparsa kendine yapar.', meaning: 'İyilik yapan iyilik, kötülük yapan kötülük bulur.' },
+  { title: 'Kişi refikinden azar.', meaning: 'Kötü arkadaş, kişiyi kötü yola sürükler.' },
+  { title: 'Kişinin kendine ettiğini kimse edemez.', meaning: 'Kişi bazen tedbirsizlikle kendine büyük zarar verir.' },
+  { title: 'Komşu ekmeği komşuya borçtur.', meaning: 'Komşunun ikramına karşılık verilmelidir.' },
+  { title: 'Komşu komşunun külüne muhtaçtır.', meaning: 'Komşular en küçük şey için bile birbirine muhtaçtır.' },
+  { title: 'Komşunu iki inekli iste ki kendin bir inekli olasın.', meaning: 'Başkasının iyi durumda olmasını dile ki sen de olasın.' },
+  { title: 'Komşunun tavuğu komşuya kaz görünür.', meaning: 'Başkasının malı daha değerli görünür.' },
+  { title: 'Korku dağları bekler.', meaning: 'Korku her yerde vardır.' },
+  { title: 'Korkunun ecele faydası yoktur.', meaning: 'Korku, kötülüğü önlemez.' },
+  { title: 'Kör görmez sezer.', meaning: 'Bilgisi olmayanın da sezileri olur.' },
+  { title: 'Körler memleketinde şaşılar padişah olur.', meaning: 'Bilgisizler arasında az bilgili başa geçer.' },
+  { title: 'Kötü komşu insanı hacet sahibi eder.', meaning: 'Kötü komşu, emanet vermez, kişi gidip kendisi almak zorunda kalır.' },
+  { title: 'Kuş, kanadına kira istemez.', meaning: 'Kişi, kendi işi için harcadığı çabadan karşılık beklemez.' },
+  { title: 'Kuş vardır eti yenir, kuş vardır et yedirilir.', meaning: 'Kimi insan çalıştırılır, kimisine hizmet edilir.' },
+  { title: 'Küheylan at, çul içinde de bellidir.', meaning: 'Değerli insan, kılıksız da olsa değerini korur.' },
+  { title: 'Kürk ile börk ile adam olunmaz.', meaning: 'Kıyafet, değersiz kişiye değer kazandırmaz.' },
+  { title: 'Laf lafı açar.', meaning: 'Konuşma uzar, gider.' },
+  { title: 'Laf torbaya girmez.', meaning: 'Ağızdan çıkan söz her yere yayılır.' },
+  { title: 'Lâfla peynir gemisi yürümez.', meaning: 'Boş lafla iş yapılmaz.' },
+  { title: 'Lokma çiğnemeden yutulmaz.', meaning: 'Her iş emek ister.' },
+  { title: 'Lokma karın doyurmaz, şefaat artırır.', meaning: 'Küçük armağan, sevgiyi artırır.' },
+  { title: 'Mahkeme kadıya mülk değil.', meaning: 'Hiç kimse kamu hizmetinde ömür boyu kalmaz.' },
+  { title: 'Mal adama hem dost hem düşmandır.', meaning: 'Malın yararı da zararı da vardır.' },
+  { title: 'Mal canı kazanmaz, can malı kazanır.', meaning: 'Sağlık, mal kazanmak uğruna tehlikeye atılmamalı.' },
+  { title: 'Mal canın yongasıdır.', meaning: 'Mal kaybı, can kaybı gibi acı verir.' },
+  { title: 'Mal da yalan mülk de yalan, var biraz da sen oyalan.', meaning: 'Dünya malı gelip geçicidir.' },
+  { title: 'Mal sahibi mülk sahibi, hani bunun ilk sahibi.', meaning: 'Mal mülk için üzülmemek veya övünmemek gerekir.' },
+  { title: 'Malı ongun olanın adı angın olur.', meaning: 'Çok ürün alanın adı her yerde anılır.' },
+  { title: 'Malın iyisi boğazdan geçer.', meaning: 'Yenemeyen malın değeri yoktur.' },
+  { title: 'Mart ayı dert ayı.', meaning: 'Martta hava değişimi hasta eder.' },
+  { title: 'Mart çıkmadıkça dert bitmez.', meaning: 'Kış hastalıkları mart sonuna kadar sürer.' },
+  { title: 'Mart dokuzunda çıra yak, bağ buda.', meaning: 'Bağ budama martın dokuzunda yapılmalı, gece bile.' },
+  { title: 'Mart kapıdan baktırır, kazma kürek yaktırır.', meaning: 'Mart soğuğunda insanlar ısınmak için her şeyi yakar.' },
+  { title: 'Maymun gözünü açtı.', meaning: 'Geçen olaydan ders alındı.' },
+  { title: 'Mızrak çuvala sığmaz.', meaning: 'Gizli tutulması imkansız durum.' },
+  { title: 'Mürüvvete endaze olmaz.', meaning: 'Yardım ve iyiliğin sınırı yoktur.' },
+  { title: 'Ne dağda bağım var ne çakaldan davam.', meaning: 'Taraf tutacak bir durumum yok.' },
+  { title: 'Ne ekersen onu biçersin.', meaning: 'Nasıl davranırsan öyle karşılık görürsün.' },
+  { title: 'Ne kokar ne bulaşır.', meaning: 'Kimseye ne iyiliği ne de kötülüğü dokunur.' },
+  { title: 'Ne od var ne ocak.', meaning: 'Yoksulluk ve perişanlık içinde.' },
+  { title: 'Ne şiş yansın ne kebap.', meaning: 'İki taraf da gücendirilmesin/korunsun.' },
+  { title: 'Ne yârdan geçilir ne serden.', meaning: 'İnsan ne kendinden ne de sevdiklerinden vazgeçebilir.' },
+  { title: 'Nefesine güvenen borazancıbaşı olur.', meaning: 'Başaracağına güvenen büyük işe girişmeli.' },
+  { title: 'Nerede hareket, orda bereket.', meaning: 'Hareket olan yerde bolluk olur.' },
+  { title: 'Oduncunun gözü omçada.', meaning: 'Herkes işine yarayan şeyi elde etmeye çalışır.' },
+  { title: 'Okka her yerde dört yüz dirhem.', meaning: 'Açık ve tartışmasız gerçek.' },
+  { title: 'Olacakla öleceğe çare bulunmaz.', meaning: 'Alın yazısı önlenemez.' },
+  { title: 'Ölüm Allah’ın emri.', meaning: 'Ölüm kaçınılmazdır.' },
+  { title: 'Ölüm hak miras helal.', meaning: 'Mirasın paylaşılması doğaldır.' },
+  { title: 'Ölümle öç alınmaz.', meaning: 'Düşmanın ölümünden sevinç duyulmaz.' },
+  { title: 'Papaz her gün pilav yemez.', meaning: 'Aynı hileyle hep kandırılamazsın.' },
+  { title: 'Para parayı çeker.', meaning: 'Eldeki parayla yeni para kazanılır.' },
+  { title: 'Para peşin, kırmızı meşin.', meaning: 'İşin karşılığı peşin ödenmeli.' },
+  { title: 'Paranın yüzü sıcaktır.', meaning: 'Para çekicidir.' },
+  { title: 'Parayı araya değil, paraya vermeli.', meaning: 'Parayı gereken yere harcamalı.' },
+  { title: 'Parayı veren düdüğü çalar.', meaning: 'Karşılığını ödeyen istediğini elde eder.' },
+  { title: 'Pekmez gibi malın olsun, Antakya’dan sinek gelir.', meaning: 'Kaliteli malın müşterisi uzaktan gelir.' },
+  { title: 'Perşembenin gelişi çarşambadan bellidir.', meaning: 'Sonuç, şimdiki gidişattan belli olur.' },
+  { title: 'Pilav yiyen kaşığını yanında taşır.', meaning: 'Yararlanmak isteyen, aracını hazır bulundurmalı.' },
+  { title: 'Pilavdan dönenin kaşığı kırılsın.', meaning: 'Yararlı bir işi sonuna kadar sürdürmeli.' },
+  { title: 'Rüzgârlı havanın kuytusu, yağmurlu havanın uykusu.', meaning: 'Rüzgârda kuytu, yağmurda uyku tercih edilir.' },
+  { title: 'Sabah ola, hayrola.', meaning: 'Sabaha kadar iş düzelebilir.' },
+  { title: 'Sabır acıdır, meyvesi tatlıdır.', meaning: 'Sabır zordur ama güzel sonuçları vardır.' },
+  { title: 'Saçın ak mı kara mı, önüne düşünce görürsün.', meaning: 'Acele etme, sonucu göreceksin.' },
+  { title: 'Sağ elinin verdiğini sol elin görmesin.', meaning: 'İyiliği gizli yap.' },
+  { title: 'Sakalım yok ki sözüm dinlensin.', meaning: 'Yaşlıların sözü dinlenir.' },
+  { title: 'Sakınılan göze çöp batar.', meaning: 'Üzerine çok düşülen şey genellikle kazaya uğrar.' },
+  { title: 'Sakla samanı, gelir zamanı.', meaning: 'Gereksiz görünen şey ilerde gerekli olabilir.' },
+  { title: 'Sarhoştum aydım, böyle yaşamaktan caydım.', meaning: 'Artık gerçekleri gördüm.' },
+  { title: 'Sarımsak yemedim ki ağzım koksun.', meaning: 'Kötü iş yapmadım ki korkayım.' },
+  { title: 'Satılık ziftin olsun, Selanik’ten kel gelir.', meaning: 'İşe yaramaz malı bile arayan bulur.' },
+  { title: 'Sel gider, kum kalır.', meaning: 'Geçici şeylere güvenilmez.' },
+  { title: 'Selam verdik, borçlu çıktık.', meaning: 'Küçük bir ilgi, büyük bir iş yükü getirdi.' },
+  { title: 'Sen giderken ben geliyordum.', meaning: 'Bu işi senden önce yaptım.' },
+  { title: 'Seninki can da benimki patlıcan mı?', meaning: 'Senin canın değerli de benimki değersiz mi?' },
+  { title: 'Serçeden korkan darı ekmez.', meaning: 'Tehlikeyi abartıp işe girişmeyen başaramaz.' },
+  { title: 'Sinek küçüktür ama mide bulandırır.', meaning: 'Önemsiz şey kötü izlenim yaratır.' },
+  { title: 'Son pişmanlık fayda vermez.', meaning: 'İş işten geçtikten sonra pişmanlık faydasızdır.' },
+  { title: 'Sorma kişinin aslını sohbetinden bellidir.', meaning: 'Kişinin karakteri konuşmasından anlaşılır.' },
+  { title: 'Su bulanmayınca durulmaz.', meaning: 'Konu, çekişmeden sonra aydınlığa kavuşur.' },
+  { title: 'Su testisi su yolunda kırılır.', meaning: 'Kişi, uğraştığı işte kazaya uğrar.' },
+  { title: 'Suyu havana koy, döv döv yine su.', meaning: 'Özelliği olan şey değişmez.' },
+  { title: 'Suyu görünce teyemmüm bozulur.', meaning: 'Zorunluluk ortadan kalkınca, iş aslına döner.' },
+  { title: 'Sütten ağzı yanan ayranı üfleyerek içer.', meaning: 'Başına gelenlerden ders alan, ihtiyatlı davranır.' },
+  { title: 'Şeytanın dostluğu darağacına kadardır.', meaning: 'Kötü arkadaş kişiyi ölüme sürükler, sonunda yalnız bırakır.' },
+  { title: 'Tabak sevdiği deriyi taştan taşa çalar.', meaning: 'Sert davranış bazen iyilik içindir.' },
+  { title: 'Tarlada izi olmayanın harmanda sözü olmaz.', meaning: 'İş üretmeyenin sözü dinlenmez.' },
+  { title: 'Taş attın da kolun mu yoruldu?', meaning: 'Bu kazancı hiç yorulmadan elde ettin.' },
+  { title: 'Taş yerinde ağırdır.', meaning: 'Herkes/şey kendi çevresinde değerlidir.' },
+  { title: 'Taşı sıksa suyunu çıkarır.', meaning: 'Çok güçlüdür.' },
+  { title: 'Taşıma su ile değirmen dönmez.', meaning: 'Başkalarının küçük katkılarıyla büyük iş yürütülemez.' },
+  { title: 'Tatlı dil yılanı deliğinden çıkarır.', meaning: 'Güler yüz ve tatlı sözle her şey halledilir.' },
+  { title: 'Tavşan dağa küsmüş, dağın haberi olmamış.', meaning: 'Önemsizin küsmesi, önemliyi ilgilendirmez.' },
+  { title: 'Tavuğun sadakası bir yumurta.', meaning: 'Gücü yetmeyenin yardımı küçük olur.' },
+  { title: 'Tekerlek kırıldıktan sonra yol gösteren çok olur.', meaning: 'İş bozulduktan sonra akıl veren çok olur.' },
+  { title: 'Tekkeyi bekleyen çorbayı içer.', meaning: 'Bir şeyi elde etmek için sıkıntıya katlanmak gerekir.' },
+  { title: 'Tembele iş buyur, sana akıl öğretsin.', meaning: 'Tembel, yardım etmek yerine akıl öğretmeye kalkar.' },
+  { title: 'Terzi kendi söküğünü dikemez.', meaning: 'İnsanlar başkalarına yaptıkları hizmeti kendilerine yapamazlar.' },
+  { title: 'Teşbihte hata olmaz.', meaning: 'Benzetme yaparken kaba söz kullanılabilir, alınmamalı.' },
+  { title: 'Tilki tilkiliğini anlatıncaya kadar post elden gider.', meaning: 'Gerçek anlatılıncaya kadar başa gelmedik kalmaz.' },
+  { title: 'Tilkinin dönüp dolaşıp geleceği yer kürkçü dükkânıdır.', meaning: 'Kişi sonunda yine asıl işine/çevresine döner.' },
+  { title: 'Tok açın hâlinden bilmez.', meaning: 'Varlıklı, yoksulun sıkıntısını anlamaz.' },
+  { title: 'Ucuz alan, pahalı alır.', meaning: 'Ucuz mal çabuk eskir, pahalıya mal olur.' },
+  { title: 'Ucuz etin yahnisi yavan olur.', meaning: 'Ucuz şeyler niteliksizdir.' },
+  { title: 'Ucuzdur vardır illeti, pahalıdır vardır hikmeti.', meaning: 'Ucuz şeye tamah edilmemeli, pahalıdan korkulmamalı.' },
+  { title: 'Ummadığın taş baş yarar.', meaning: 'Küçük şey büyük etki yapabilir.' },
+  { title: 'Uyuyan yılanın kuyruğuna basma.', meaning: 'Sana zararı dokunmayanı kışkırtma.' },
+  { title: 'Üzüm üzüme baka baka kararır.', meaning: 'Birlikte olanlar birbirine huy geçirir.' },
+  { title: 'Üşüntü köpekler mandayı parçalar.', meaning: 'Birlikten güç doğar.' },
+  { title: 'Vakitsiz öten horozun başını keserler.', meaning: 'Söz yerinde ve zamanında söylenmeli.' },
+  { title: 'Vermeyince mabut, neylesin Sultan Mahmut.', meaning: 'Allah nasip etmemişse elden bir şey gelmez.' },
+  { title: 'Yanlış hesap Bağdat’tan döner.', meaning: 'Yanlışlık geç de olsa düzeltilebilir.' },
+  { title: 'Yarası olan gocunur.', meaning: 'Kusuru olan tedirgin olur.' },
+  { title: 'Yarım elma, gönül alma.', meaning: 'Küçük armağan bile gönül alır.' },
+  { title: 'Yaş kesen baş keser.', meaning: 'Ağaç kesmek, insan öldürmek kadar büyük suçtur.' },
+  { title: 'Yavaş atın tekmesi yavuz olur.', meaning: 'Yumuşak huylu, öfkelendiğinde aşırı davranabilir.' },
+  { title: 'Yel gibi gelen sel gibi gider.', meaning: 'Emek verilmeden kazanılan, çabuk harcanır.' },
+  { title: 'Yeme de yanında yat.', meaning: 'Çok lezzetli veya hoş şeyler için söylenir.' },
+  { title: 'Yiğit meydanda belli olur.', meaning: 'Asıl marifet iş başında belli olur.' },
+  { title: 'Yüz yüzden utanır.', meaning: 'İnsanlar yüz yüze gelince daha kolay uzlaşır.' },
+  { title: 'Zahmetsiz rahmet olmaz.', meaning: 'Güzel şeyler emekle elde edilir.' },
+  { title: 'Zenginin malı züğürdün çenesini yorar.', meaning: 'Zenginliğinden çok söz etmek gereksizdir.' },
+  { title: 'Zor oyunu bozar.', meaning: 'Zor kullanılarak düzen bozulur.' },
+  { title: 'Zorla güzellik olmaz.', meaning: 'Kişiye zorla bir şey beğendirilemez.' },
+  { title: 'Zurnada peşrev olmaz, ne çıkarsa bahtına.', meaning: 'Plansız işte yöntem, kural aranmaz.' },
+  { title: 'Zürefanın düşkünü, beyaz giyer kış günü.', meaning: 'Eski durumunu kaybeden, uygunsuz davranışlarda bulunur.' },
+  { title: 'Zülfü yare dokunmak.', meaning: 'Kırılması doğru olmayan kişiyi gücendirecek söz/davranış.' },
+  { title: 'Acele giden ecele gider.', meaning: 'Acele eden kişi zarar görür.' },
+  { title: 'Acıklı başta akıl olmaz.', meaning: 'Dertli insan sağlıklı düşünemez.' },
+  { title: 'Acından kimse ölmemiş.', meaning: 'Açlık, sabredildiğinde atlatılır.' },
+  { title: 'Aç ayı oynamaz.', meaning: 'Karnı aç olan çalışmaz.' },
+  { title: 'Aç doymam, tok acıkmam sanır.', meaning: 'İnsan bulunduğu durumun tersini düşünmez.' },
+  { title: 'Aç gözünü, açarlar gözünü.', meaning: 'Tedbirli ol, yoksa zarara uğrarsın.' },
+  { title: 'Aç tokun gözüne bakmakla doymaz.', meaning: 'İhtiyaç sözle değil, doyurmakla giderilir.' },
+  { title: 'Aça dokuz yorgan örtmüşler, yine uyuyamamış.', meaning: 'Açlık, hiçbir şeyle giderilemez.' },
+  { title: 'Açık kapı kilit tutmaz.', meaning: 'Önlem alınmazsa zarar engellenmez.' },
+  { title: 'Açılan solar, ağlayan güler.', meaning: 'Her şeyin sonu vardır; dert de sevinç de geçicidir.' },
+  { title: 'Açın gözü ekmek teknesinde olur.', meaning: 'Aç kimse yalnızca yiyeceği düşünür.' },
+  { title: 'Açın karnı doyar, gözü doymaz.', meaning: 'Açlık gider ama ihtiras bitmez.' },
+  { title: 'Açın kursağına çörek dayanmaz.', meaning: 'Çok aç olanın yediği yetmez.' },
+  { title: 'Açma sırrını dostuna, dostunun dostu vardır o da söyler dostuna.', meaning: 'Sır paylaşıldıkça yayılır.' },
+  { title: 'Açtırma kutuyu, söyletme kötüyü.', meaning: 'Suskun kalmak daha hayırlıdır, kötüyü konuşturma.' },
+  { title: 'Ada bana, adayım sana.', meaning: 'İnsan, gördüğü iyiliğin karşılığını vermelidir.' },
+  { title: 'Adam adama gerek olur.', meaning: 'İnsan, diğer insanlara muhtaçtır.' },
+  { title: 'Adam adamdır olmasa da pulu, eşek eşektir atlastan olsa çulu.', meaning: 'İnsanın değeri para ile değil, huyu ile ölçülür.' },
+  { title: 'Adamakla mal tükenmez.', meaning: 'İyilik için söz vermek, malı eksiltmez.' },
+  { title: 'Adamın adı çıkacağına canı çıksın.', meaning: 'İtibarı kötüye çıkanın durumu çok zor olur.' },
+  { title: 'Adamın iyisi iş başında belli olur.', meaning: 'Kişinin değeri çalışmasında anlaşılır.' },
+  { title: 'Ağaran baş, ağlayan göz gizlenmez.', meaning: 'Yaşlılık ve üzüntü gizlenemez.' },
+  { title: 'Ağılda oğlak doğsa ovada otu biter.', meaning: 'Her doğan kendi rızkıyla gelir.' },
+  { title: 'Ağır ağır demeli, çabuk çabuk yemeli.', meaning: 'İşte temkinli, yemekte hızlı olunmalıdır.' },
+  { title: 'Ağır taş yerinden oynamaz.', meaning: 'Ağırlığını bilen insan kolay kolay sarsılmaz.' },
+  { title: 'Ağlamak para etmez.', meaning: 'Dertlenmek çözüm getirmez.' },
+  { title: 'Ağlayıp da gözden mi olayım?', meaning: 'Boş yere üzülmek faydasızdır.' },
+  { title: 'Ağzı eğri, gözü şaşı ensesinden belli olur.', meaning: 'Kişinin kusuru gizlenemez.' },
+  { title: 'Ağzından hayır çıkmazsa bari şer söyleme.', meaning: 'İyilik yapamıyorsan, kötülük etme.' },
+  { title: 'Ah alan onmaz.', meaning: 'Beddua alınca huzur bulunmaz.' },
+  { title: 'Ah yerde kalmaz.', meaning: 'Haksızlık karşılıksız kalmaz.' },
+  { title: 'Ahmağa yüz, abdala söz vermeye gelmez.', meaning: 'Akılsız ve derviş görünümlü kişiye güvenilmez.' },
+  { title: 'Akan çay her zaman kütük getirmez.', meaning: 'Her olay aynı sonucu doğurmaz.' },
+  { title: 'Akan su yosun tutmaz.', meaning: 'Çalışkan, hareketli insan körelmez.' },
+  { title: 'Akarsu pislik tutmaz.', meaning: 'Sürekli hareket eden temiz kalır.' },
+  { title: 'Akarsu, çukurunu kendi kazar.', meaning: 'Sürekli akan şey kendi yolunu bulur.' },
+  { title: 'Akıl için yol birdir.', meaning: 'Doğruya ulaşmanın yolu aynıdır.' },
+  { title: 'Akıl kişiye sermayedir.', meaning: 'Akıl, insana kazanç sağlar.' },
+  { title: 'Akıl para ile satılmaz.', meaning: 'Akıl değerli, satın alınamaz bir nimettir.' },
+  { title: 'Akılları pazara çıkarmışlar, herkes yine kendi aklını almış.', meaning: 'İnsan kendi düşüncesini beğenir.' },
+  { title: 'Akıllı düşman, akılsız dosttan yeğdir.', meaning: 'Akıllı düşman, zarar vermekte bile ölçülüdür.' },
+  { title: 'Akıllı düşününceye kadar deli çocuğunu everir.', meaning: 'Acele eden fırsatı kaçırmaz.' },
+  { title: 'Akıllı görgüyü görgüsüzden öğrenir.', meaning: 'İnsan, yanlış yapanlardan da ders çıkarır.' },
+  { title: 'Akıllı, sözünü akılsıza söyletir.', meaning: 'Akıllı kişi kendini açığa çıkarmaz, başkasını konuşturur.' },
+  { title: 'Akla gelmeyen başa gelir.', meaning: 'İnsan hiç beklemediğini yaşar.' },
+  { title: 'Aklı başa yaş getirir.', meaning: 'Olgunluk yaşla gelir.' },
+  { title: 'Aklın yolu birdir.', meaning: 'Doğru yol herkes için aynıdır.' },
+  { title: 'Akraba ile ye, iç; alışveriş etme.', meaning: 'Akrabayla ticaret dostluğu bozar.' },
+  { title: 'Alacağına şahin, vereceğine karga.', meaning: 'İnsan alacağını çabuk ister, vermeye gelince gönülsüzdür.' },
+  { title: 'Alçak uçan yüce konar, yüce uçan alçak konar.', meaning: 'Mütevazı olan kazanır, kibirli olan düşer.' },
+  { title: 'Alçak yer yiğidi hor gösterir.', meaning: 'Kişinin bulunduğu yer değeri etkiler.' },
+  { title: 'Alçak yerde tepecik kendini dağ sanır.', meaning: 'Küçük şey büyük görünmeye çalışır.' },
+  { title: 'Alet işler el övünür.', meaning: 'Başarıyı sağlayan araçtır, kişi onunla övünür.' },
+  { title: 'Âlim unutmuş, kalem unutmamış.', meaning: 'İnsan unutur ama yazı unutmaz.' },
+  { title: 'Allah bir kapıyı kapatırsa ötekini açar.', meaning: 'Bir sıkıntı bitince yeni bir imkân doğar.' },
+  { title: 'Allah dağına göre kar verir.', meaning: 'İnsan gücüne göre imtihan olur.' },
+  { title: 'Allah gümüş kapıyı kaparsa altın kapıyı açar.', meaning: 'Bir fırsat kapanırsa daha iyisi çıkar.' },
+  { title: 'Allah sabırlı kulunu sever.', meaning: 'Sabırlı olmak değerli bir erdemdir.' },
+  { title: 'Allah sağ gözü, sol göze muhtaç etmesin.', meaning: 'İnsan kendi gücüne muhtaç kalmasın.' },
+  { title: 'Altın anahtar her kapıyı açar.', meaning: 'Para ve güzel söz iş bitirir.' },
+  { title: 'Altın ateşte, insan mihnette belli olur.', meaning: 'İnsanın değeri zorlukta anlaşılır.' },
+  { title: 'Altın eli bıçak kesmez.', meaning: 'Değerli şey zarar görmez.' },
+  { title: 'Altın pas tutmaz.', meaning: 'Değerli şey değerinden kaybetmez.' },
+  { title: 'Altın tutsa toprak olur.', meaning: 'Eli uğursuz kişinin elinde kıymetli şey değerini yitirir.' },
+  { title: 'Altın, yerde paslanmaz; taş, yağmurda ıslanmaz.', meaning: 'Asıl değer değişmez.' },
+  { title: 'Altını saklamak değil, kuruşu saklamak hünerdir.', meaning: 'Küçük şeyleri korumak önemlidir.' },
+  { title: 'Ana kızına taht kurmuş, baht kuramamış.', meaning: 'İnsana talih verilemez.' },
+  { title: 'Ananın bahtı kızına.', meaning: 'Çocuğun kaderi annesine benzer.' },
+  { title: 'Araba ile tavşan avlanmaz.', meaning: 'Yanlış araçla iş yapılmaz.' },
+  { title: 'Arabanın ön tekerleği nereden geçerse art tekerleği de oradan geçer.', meaning: 'Büyüklerin yolundan küçükler gider.' },
+  { title: 'Arı gibi eri olanın dağ kadar yeri olur.', meaning: 'Çalışkan kişinin kazancı çok olur.' },
+  { title: 'Arif olan anlar.', meaning: 'Akıllı kişi az sözden anlar.' },
+  { title: 'Arife günü yalan söyleyenin bayram günü yüzü kara çıkar.', meaning: 'Yalancı sonunda utanır.' },
+  { title: 'Arkadaşını söyle, sana kim olduğunu söyleyeyim.', meaning: 'İnsan arkadaşından belli olur.' },
+  { title: 'Arpa samanıyla, kömür dumanıyla.', meaning: 'Basit şeyler basit sonuç verir.' },
+  { title: 'Arpa verilmeyen at, kamçı zoruyla yürümez.', meaning: 'İhtiyacı karşılanmayan iş işlemez.' },
+  { title: 'Arsızın yüzüne tükürmüşler \'yağmur yağıyor\' demiş.', meaning: 'Utanmayan, her şeyi kendine yontar.' },
+  { title: 'Artık mal göz çıkarmaz.', meaning: 'Fazlalık zarar vermez.' },
+  { title: 'Aşığa Bağdat uzak değil.', meaning: 'Aşık için mesafe engel değildir.' },
+  { title: 'At ölür, meydan kalır; yiğit ölür, şan kalır.', meaning: 'İnsan ölür ama ünü kalır.' },
+  { title: 'At yiğidin yoldaşıdır.', meaning: 'At, yiğidin yardımcısıdır.' },
+  { title: 'Ata binen nalını, mıhını arar.', meaning: 'İşe başlayan, eksiklerini fark eder.' },
+  { title: 'Atalar sözünü tutmayanı yabana atarlar.', meaning: 'Deneyimle gelen öğütleri dinlemeyen dışlanır.' },
+  { title: 'Ateş demekle ağız yanmaz.', meaning: 'Bir şeyi söylemek, onu yaşamış olmak değildir.' },
+  { title: 'Ateşe vursa duman vermez.', meaning: 'İşe yaramayan kişiden fayda beklenmez.' },
+  { title: 'Atılan ok geri dönmez.', meaning: 'Söylenen söz, yapılan iş geri alınmaz.' },
+  { title: 'Atım tepmez, itim kapmaz deme.', meaning: 'Güvendiğinden bile zarar gelebilir.' },
+  { title: 'Atın bahtsızı arabaya düşer.', meaning: 'Şanssız kişinin başına kötü işler gelir.' },
+  { title: 'Atın tepmezi, itin kapmazı olmaz.', meaning: '“Zarar vermez.” denilen de zarar verebilir.' },
+  { title: 'Atına bakan ardına bakmaz.', meaning: 'İşini iyi yapan sıkıntı çekmez.' },
+  { title: 'Atlar tepişir, arada eşekler ezilir.', meaning: 'Büyüklerin kavgasından küçükler zarar görür.' },
+  { title: 'Ava gelmez kuş olmaz, başa gelmez iş olmaz.', meaning: 'Olmayacak şey yoktur, her şey mümkündür.' },
+  { title: 'Ay görmüşün yıldıza minneti yoktur.', meaning: 'Elinde iyisi olan, kötüsünü istemez.' },
+  { title: 'Ay var, yılı besler; yıl var, ayı beslemez.', meaning: 'Her zaman bolluk olmaz.' },
+  { title: 'Ayağı yürüten baştır.', meaning: 'Kararı beyin verir, beden uygular.' },
+  { title: 'Ayağını sıcak tut, başını serin; gönlünü ferah tut, düşünme derin.', meaning: 'Sağlık ve huzur için ölçülü yaşa.' },
+  { title: 'Ayı sevdiği yavrusunu hırpalar.', meaning: 'Sevgi bazen zarar verir.' },
+  { title: 'Ayıpsız dost arayan, dostsuz kalır.', meaning: 'Kusursuz arkadaş bulmak imkânsızdır.' },
+  { title: 'Ayıyı fırına atmışlar, yavrusunu ayağının altına almış.', meaning: 'Kendini kurtarmak için yavrusunu feda etmiş.' },
+  { title: 'Az ateş çok odunu yakar.', meaning: 'Küçük şey büyük zarara yol açabilir.' },
+  { title: 'Aza kanaat etmeyen çoğu bulamaz.', meaning: 'Azla yetinmeyen, çoğu da kaybeder.' },
+  { title: 'Aza sormuşlar: “Nereye?”, “Çoğun yanına.” demiş.', meaning: 'Açgözlü hep fazlayı arar.' },
+  { title: 'Azıcık aşım, kaygısız başım.', meaning: 'Kanaatkâr insan huzurludur.' },
+  { title: 'Baba kırk oğul beslemiş, kırk oğul bir babayı beslememiş.', meaning: 'Evlatlar bazen babaya vefa göstermez.' },
+  { title: 'Baba koruk yer, oğlunun dişi kamaşır.', meaning: 'Baba yaptığının bedelini oğul öder.' },
+  { title: 'Baba oğluna bir bağ bağışlamış, oğul babaya bir salkım üzüm vermemiş.', meaning: 'Evlat nankör olabilir.' },
+  { title: 'Babanın sanatı oğla mirastır.', meaning: 'Çocuğun mesleği babadan geçer.' },
+  { title: 'Bağ babadan, zeytin dededen kalmalı.', meaning: 'Tarımda süreklilik esastır.' },
+  { title: 'Bağ bayırda, tarla çayırda.', meaning: 'Yerine göre ürün yetişir.' },
+  { title: 'Bahşiş atın dişine bakılmaz.', meaning: 'Hediye kusur aranmaz.' },
+  { title: 'Bakmakla usta olunsa köpekler kasap olurdu.', meaning: 'Sadece bakmakla öğrenilmez.' },
+  { title: 'Bal ile kaymak yenir ama her keseye göre değil.', meaning: 'Her şey herkesin imkânına uygun değildir.' },
+  { title: 'Balcının var bal tası, oduncunun var baltası.', meaning: 'Herkes işine uygun araçla çalışır.' },
+  { title: 'Balık ağa girdikten sonra aklı başına gelir.', meaning: 'Tehlikeye düşen aklını başına toplar.' },
+  { title: 'Bana dokunmayan yılan bin yaşasın.', meaning: 'İnsan bencildir, kendine dokunmayan kötülüğe ses çıkarmaz.' },
+  { title: 'Baş ağır gerek, kulak sağır.', meaning: 'Ağırbaşlı olmak ve laf dinlememek gerekir.' },
+  { title: 'Baş başa vermeyince taş yerinden kalkmaz.', meaning: 'İşbirliği olmadan iş yapılmaz.' },
+  { title: 'Baş dille tartılır.', meaning: 'İnsanın değeri sözünden belli olur.' },
+  { title: 'Baş nereye giderse ayak da oraya gider.', meaning: 'Yönetici ne yaparsa halk da onu yapar.' },
+  { title: 'Baş ol da istersen soğan başı ol.', meaning: 'Önemli olan lider olmaktır.' },
+  { title: 'Baş olan boş olmaz.', meaning: 'Yöneten bir şey kazanır.' },
+  { title: 'Başa gelen çekilir.', meaning: 'Yazgıya katlanılır.' },
+  { title: 'Başak büyüdükçe boynunu eğer.', meaning: 'Olgun insan alçakgönüllü olur.' },
+  { title: 'Başın sağlığı, dünyanın varlığı.', meaning: 'Sağlık en büyük zenginliktir.' },
+  { title: 'Battı balık yan gider.', meaning: 'Zarar göze alındıktan sonra gerisi düşünülmez.' },
+  { title: 'Baykuşun kısmeti ayağına gelir.', meaning: 'Talihsizin bile kısmeti olur.' },
+  { title: 'Benzeye benzeye yaz, benzeye benzeye kış olur.', meaning: 'İnsan çevresinden etkilenir.' },
+  { title: 'Besledik büyüttük danayı, şimdi tanımaz oldu anayı.', meaning: 'Beslenen kişi nankörlük edebilir.' },
+  { title: 'Beş kuruşun varsa beş yere düğümle.', meaning: 'Malı tedbirle harca.' },
+  { title: 'Beşikte giren mezarda çıkar.', meaning: 'Hayat doğumdan ölüme sürer.' },
+  { title: 'Bıçağı kestiren kendi suyu, insanı sevdiren kendi huyu.', meaning: 'İnsan huyuyla değer bulur.' },
+  { title: 'Bıldırcının beyliği arpa biçimine kadardır.', meaning: 'Makam ve güç geçicidir.' },
+  { title: 'Bin dost az, bir düşman çok.', meaning: 'Dost çok bile olsa yetmez, bir düşman yeterlidir.' },
+  { title: 'Bin merak bir borç ödemez.', meaning: 'Merakla iş çözülmez.' },
+  { title: 'Bin ölçüp bir biçmeli.', meaning: 'Karar verirken dikkatli olmalı.' },
+  { title: 'Bir kimsenin adı çıkacağına canı çıksın.', meaning: 'Kötü şöhret yaşamaktan beter.' },
+  { title: 'Bir ağacın gölgesinde bir sürü yatar.', meaning: 'Bir iyilikten çok kişi faydalanır.' },
+  { title: 'Bir ağaçta gül de biter diken de.', meaning: 'İyiden de kötüden de aynı yerde çıkar.' },
+  { title: 'Bir başa bir göz yeter.', meaning: 'İnsan kanaatkâr olmalı.' },
+  { title: 'Bir buldu iki ister, akça buldu çıkın ister.', meaning: 'Açgözlü doymaz.' },
+  { title: 'Bir deli kuyuya taş atar, kırk akıllı çıkaramaz.', meaning: 'Akılsızın yaptığı iş, akıllıyı uğraştırır.' },
+  { title: 'Bir dirhem bal için bir çeki odun yenmez.', meaning: 'Küçük kazanç için büyük zahmet çekilmez.' },
+  { title: 'Bir el bir eli yıkar, iki el bir yüzü yıkar.', meaning: 'Dayanışma fayda getirir.' },
+  { title: 'Bir elin sesi çıkmaz.', meaning: 'Tek başına iş olmaz.' },
+  { title: 'Bir elin verdiğini, öbür elin duymasın.', meaning: 'İyilik gizli yapılmalı.' },
+  { title: 'Bir göz ağlarken öbür göz gülmez.', meaning: 'Gerçek acı eğlenceye izin vermez.' },
+  { title: 'Bir kanatla kuş uçmaz.', meaning: 'Eksik araçla iş olmaz.' },
+  { title: 'Bir korkak bir orduyu bozar.', meaning: 'Korkaklık başkasına da zarar verir.' },
+  { title: 'Bir kötünün yedi mahalleye zararı vardır.', meaning: 'Bir kötü kişi çok kişiye zarar verir.' },
+  { title: 'Bir selam bin hatır yapar.', meaning: 'Selam vermek, dostluğu artırır.' },
+  { title: 'Bir sıçrarsın çekirge, iki sıçrarsın çekirge, sonunda yakalanırsın çekirge.', meaning: 'Kötülük yapan bir süre kurtulur ama sonunda yakalanır.' },
+  { title: 'Bir söyle, on dinle.', meaning: 'Konuşmaktan çok dinlemek faydalıdır.' },
+  { title: 'Bir sürçen atın başı kesilmez.', meaning: 'Küçük hatadan dolayı kimseye büyük ceza verilmez.' },
+  { title: 'Bir taş ile iki kuş vurulmaz.', meaning: 'Aynı anda iki iş birden her zaman başarılamaz.' },
+  { title: 'Bir tepe yıkılır, bir dere dolar.', meaning: 'Bir şey yok olurken başka bir şey meydana gelir.' },
+  { title: 'Bir tutam ot deveye hendek atlatır.', meaning: 'Küçük şey bile büyük fayda sağlayabilir.' },
+  { title: 'Bir varmış, bir yokmuş.', meaning: 'Hayat gelip geçicidir.' },
+  { title: 'Bir vuruşla ağaç devrilmez.', meaning: 'Büyük işler bir anda olmaz.' },
+  { title: 'Bir yemem diyenden kork, bir oturmam diyenden.', meaning: '"Yapmam" diyenin daha çok yapmasından şüphe edilir.' },
+  { title: 'Biri yer, biri bakar; kıyamet ondan kopar.', meaning: 'Eşitsizlik huzursuzluk doğurur.' },
+  { title: 'Biz attık kemik diye, el kaptı ilik diye.', meaning: 'İnsan emeğinin karşılığını bazen başkası alır.' },
+  { title: 'Biz bize benzeriz.', meaning: 'Her milletin kendi özelliği vardır.' },
+  { title: 'Bol bol yiyen, bel bel bakar.', meaning: 'Çok yiyen tembel olur.' },
+  { title: 'Borç iyi güne kalmaz.', meaning: 'Borç geciktirilmez.' },
+  { title: 'Borç yiyen kesesinden yer.', meaning: 'Borç, sonunda kişiyi fakirleştirir.' },
+  { title: 'Boş başağın başı dik olur.', meaning: 'Bilgisiz kişi kendini beğenir.' },
+  { title: 'Boş çuval ayakta durmaz.', meaning: 'Hazırlıksız iş olmaz.' },
+  { title: 'Boş teneke çok ses çıkarır.', meaning: 'Değersiz kişi çok konuşur.' },
+  { title: 'Boş torba ile at tutulmaz.', meaning: 'Aç karınla iş yapılmaz.' },
+  { title: 'Boşboğazı ateşe atmışlar, odunum yaş demiş.', meaning: 'Gevezelik eden, başına iş açar.' },
+  { title: 'Boynuz kulaktan sonra çıkar ama kulağı geçer.', meaning: 'Sonradan gelen, eskisini geçebilir.' },
+  { title: 'Böyle gelmiş böyle gider.', meaning: 'Alışılmış düzen kolay kolay değişmez.' },
+  { title: 'Bu kadar kusur kadı kızında da bulunur.', meaning: 'Kusursuz kimse yoktur.' },
+  { title: 'Bugün bana ise yarın sana.', meaning: 'Bugün başkasına gelen, yarın sana da gelebilir.' },
+  { title: 'Bugünkü ekmek, yarınki çörekten yeğdir.', meaning: 'Elde olan, olmayacak olandan iyidir.' },
+  { title: 'Bugünkü tavuk, yarınki kazdan iyidir.', meaning: 'Küçük ama kesin olan, büyük ama belirsizden değerlidir.' },
+  { title: 'Buğday başak verince orak pahaya çıkar.', meaning: 'Ürün olunca değer kazanır.' },
+  { title: 'Buldum bilemedim, bildim bulamadım.', meaning: 'Bilgi arayarak öğrenilir.' },
+  { title: 'Bükemediğin eli öp.', meaning: 'Gücünün yetmediğine boyun eğ.' },
+  { title: 'Bülbülün çektiği dili belası.', meaning: 'İnsan başına sözü yüzünden iş açar.' },
+  { title: 'Cahile söz anlatmak deveye hendek atlatmaktan güçtür.', meaning: 'Bilgisize laf anlatmak çok zordur.' },
+  { title: 'Cahilin dostluğundan arifin düşmanlığı yeğdir.', meaning: 'Bilgisiz dost zararlı olur.' },
+  { title: 'Caminin mumunu yiyen kedinin gözü kör olur.', meaning: 'Haram yiyen zarar görür.' },
+  { title: 'Can bostanda bitmez.', meaning: 'Canın değeri, başka hiçbir şeyle kıyaslanamaz.' },
+  { title: 'Can candan şirindir.', meaning: 'İnsan için en değerli şey candır.' },
+  { title: 'Canı kaymak isteyen mandayı yanında taşır.', meaning: 'İyiyi isteyen zahmetine katlanır.' },
+  { title: 'Cins cinse çeker.', meaning: 'İnsan benzeyeniyle arkadaş olur.' },
+  { title: 'Çabalama kaptan ben gidemem.', meaning: 'İmkanı olmayan işte uğraş faydasızdır.' },
+  { title: 'Çam sakızı, çoban armağanı.', meaning: 'Küçük ama içten gelen armağan değerlidir.' },
+  { title: 'Çanakta balın olsun, Bağdat’tan arı gelir.', meaning: 'İyinin ünü her yere yayılır.' },
+  { title: 'Çatal kazık yere batmaz.', meaning: 'İki farklı yön bir arada barınmaz.' },
+  { title: 'Çıra dibi karanlık olur.', meaning: 'İnsan yakınına fayda vermez.' },
+  { title: 'Çiftçinin karnını yarmışlar, kırk tane “gelecek yıl” çıkmış.', meaning: 'Çiftçi hep umutla yaşar.' },
+  { title: 'Çocuğun yediği helal, giydiği haram.', meaning: 'Çocuğa yedirilen helaldir ama çok giysi almak zarardır.' },
+  { title: 'Çocuktan al haberi.', meaning: 'Çocuklar doğruyu söyler.' },
+  { title: 'Çömlekçi suyu saksıdan içer.', meaning: 'İnsan kendi yaptığı işten faydalanır.' },
+  { title: 'Çöreğin büyüğü, hamurun çoğundan olur.', meaning: 'Çok emek veren çok sonuç alır.' },
+  { title: 'Çürük tahta çivi tutmaz.', meaning: 'Dayanıksız şeyden fayda gelmez.' },
+  { title: 'Dağ başına kış gelir, insanın başına iş gelir.', meaning: 'İnsan her zaman sıkıntıyla karşılaşır.' },
+  { title: 'Dağ doğura doğura bir fare doğurmuş.', meaning: 'Çok beklenen iş küçük sonuç vermiştir.' },
+  { title: 'Darı unundan baklava, incir ağacından oklava olmaz.', meaning: 'Olmayan şeyden iş çıkmaz.' },
+  { title: 'Davul birinin boynunda, tokmak bir başkasının elinde.', meaning: 'İşin sorumluluğu başkasına bırakılmıştır.' },
+  { title: 'Davulu biz çaldık, parsayı başkası topladı.', meaning: 'Emek başkasına yarar.' },
+  { title: 'Değirmene gelen nöbet bekler.', meaning: 'Her işin bir sırası vardır.' },
+  { title: 'Deli dostun olacağına akıllı düşmanın olsun.', meaning: 'Akıllı düşman bile yararlı olabilir, ama deli dost zararlıdır.' },
+  { title: 'Deliden al uslu haberi.', meaning: 'Bazen akılsız görünen de doğru söz söyleyebilir.' },
+  { title: 'Demir ıslanmaz, deli uslanmaz.', meaning: 'Alışkanlıklarından vazgeçmeyen değişmez.' },
+  { title: 'Dert çekene göredir.', meaning: 'Sıkıntıyı yaşayan bilir.' },
+  { title: 'Dert gezmiş, derman da beraber gezmiş.', meaning: 'Çare, derdin yakınındadır.' },
+  { title: 'Dert gider amma yeri boş kalmaz.', meaning: 'Bir sıkıntı geçer, başka sıkıntı gelir.' },
+  { title: 'Dert gitmez, değişir.', meaning: 'Sıkıntılar yok olmaz, sadece türü değişir.' },
+  { title: 'Deve boynuz ararken kulaktan olmuş.', meaning: 'Daha iyisini isterken elindekinden olur.' },
+  { title: 'Deve Kâbe’ye gitmekle hacı olmaz.', meaning: 'Bir yere gitmekle iş olmaz, niyet önemlidir.' },
+  { title: 'Deveden büyük fil var.', meaning: 'Her güçlüden daha güçlü biri vardır.' },
+  { title: 'Deveye “İnişi mi seversin, yokuşu mu?” demişler; “Düz yok mu?” demiş.', meaning: 'İnsan hep kolayı ister.' },
+  { title: 'Dibi görünmeyen sudan geçme.', meaning: 'Sonunu bilmediğin işe girme.' },
+  { title: 'Dibi görünmeyen tastan su içme.', meaning: 'Güvenmediğin şeyden yararlanma.' },
+  { title: 'Diken battığı yerden çıkar.', meaning: 'Sorun, çıktığı yerden çözülür.' },
+  { title: 'Dil yarası, kılıç yarasından derindir.', meaning: 'Söz, bedenden daha çok incitir.' },
+  { title: 'Dile gelen ele gelir.', meaning: 'İnsan, söylediğinin karşılığını görür.' },
+  { title: 'Dilim seni dilim dilim dileyim, başıma geleni senden bileyim.', meaning: 'İnsan çoğu sıkıntıyı diliyle yaşar.' },
+  { title: 'Dilin cirmi küçük, cürmü büyük.', meaning: 'Dil küçüktür ama büyük zarar verir.' },
+  { title: 'Dilin kemiği yok.', meaning: 'İnsan ağzına geleni kolayca söyler.' },
+  { title: 'Doğru bilinmeyince eğri bilinmez.', meaning: 'Gerçek bilinmezse yanlış da anlaşılmaz.' },
+  { title: 'Doğru söyleyeni dokuz köyden kovarlar.', meaning: 'Gerçeği söyleyen hoş karşılanmaz.' },
+  { title: 'Doğru söyleyenin bir ayağı üzengide gerek.', meaning: 'Gerçeği söyleyen, kaçmaya hazır olmalı.' },
+  { title: 'Doğru söyleyenin tepesi delik olur.', meaning: 'Doğru söz, insana sıkıntı getirir.' },
+  { title: 'Doğru söz yemin istemez.', meaning: 'Gerçek söz kanıta ihtiyaç duymaz.' },
+  { title: 'Doğruluk minarede kalmış, onun da içi eğri.', meaning: 'Dünyada tam doğruluk kalmamıştır.' },
+  { title: 'Dolu küpün sesi çıkmaz.', meaning: 'Bilgili insan çok konuşmaz.' },
+  { title: 'Dost bin ise azdır, düşman bir ise çoktur.', meaning: 'Dost çok olsa da yetmez, düşman az da olsa fazladır.' },
+  { title: 'Dost dostun eyerlenmiş atıdır.', meaning: 'Gerçek dost her zaman hazırdır.' },
+  { title: 'Dost kara günde belli olur.', meaning: 'Zor zamanda gerçek dost anlaşılır.' },
+  { title: 'Dost sözü acıdır.', meaning: 'Dost doğruyu söyler, hoşuna gitmez.' },
+  { title: 'Dostluk kantarla, alışveriş miskalle.', meaning: 'Dostluk geniş, alışveriş ölçülüdür.' },
+  { title: 'Dökme su ile değirmen dönmez.', meaning: 'Geçici destek kalıcı iş gördürmez.' },
+  { title: 'Dört göz bir evlat için.', meaning: 'Çocuğu korumak için herkes dikkat eder.' },
+  { title: 'Dünkü akıl, bugünkü işe yetmez.', meaning: 'Yeni işler yeni akıl ister.' },
+  { title: 'Dünya bir, işi bin.', meaning: 'Dünya küçüktür ama sorunları çoktur.' },
+  { title: 'Dünya tükenir, yalan tükenmez.', meaning: 'İnsan yalan söylemeye devam eder.' },
+  { title: 'Dünyada tasasız baş bostan korkuluğunda bulunur.', meaning: 'Hiç kaygısız insan yoktur.' },
+  { title: 'Dünyanın ucu uzundur.', meaning: 'Dünya çok geniştir, bilinmeyen çoktur.' },
+  { title: 'Dünyayı sel bassa ördeğe vız gelir.', meaning: 'Herkese aynı olay aynı etkiyi yapmaz.' },
+  { title: 'Düş uykudan sonra olur.', meaning: 'Hayal, uyuduktan sonra görülür.' },
+  { title: 'Düşenin dostu olmaz, hele bir düş de gör.', meaning: 'Zor durumda olanı herkes bırakır.' },
+  { title: 'Düşenin dostu olmaz.', meaning: 'Başına iş gelene kimse sahip çıkmaz.' },
+  { title: 'Düşmanın karınca ise de hor bakma.', meaning: 'Düşman küçümsenmemelidir.' },
+  { title: 'Düşmez kalkmaz bir Allah.', meaning: 'Herkes hata yapar.' },
+  { title: 'Düşüne düşüne görmeli işi, sonra pişman olmamalı kişi.', meaning: 'İnsan işini akıllıca yapmalı.' },
+  { title: 'Düt demeye dudak gerek.', meaning: 'En küçük iş için bile emek gerekir.' },
+  { title: 'Eden bulur.', meaning: 'Kötülük eden, karşılığını görür.' },
+  { title: 'Eğreti kuyruk tez kopar.', meaning: 'Sonradan eklenen şey kalıcı olmaz.' },
+  { title: 'Eğri cetvelden doğru çizgi çıkmaz.', meaning: 'Yanlıştan doğru sonuç alınmaz.' },
+  { title: 'Ekşi yüzlünün balı acı olur.', meaning: 'Somurtkanın iyiliği bile kötü görünür.' },
+  { title: 'El el ile, değirmen yel ile.', meaning: 'İnsan yardımla, iş rüzgarla yürür.' },
+  { title: 'El elin aynasıdır.', meaning: 'İnsan, başkasında kendini görür.' },
+  { title: 'El elin nesine, gülerek gider yasına.', meaning: 'İnsan başkasının derdiyle ilgilenmez.' },
+  { title: 'El için kuyu kazan, evvela kendisi düşer.', meaning: 'Başkasına kötülük eden, kendisi zarar görür.' },
+  { title: 'El için yanma nâra, yak çubuğunu bak keyfine.', meaning: 'Başkası için üzülme, kendini düşün.' },
+  { title: 'El öpmekle ağız aşınmaz.', meaning: 'Saygı göstermek insana zarar vermez.' },
+  { title: 'El, elin eşeğini türkü çağırarak arar.', meaning: 'Başkasının işini öylesine yapar.' },
+  { title: 'Eldeki yara, yarasıza duvar deliği.', meaning: 'İnsan kendi derdine yanar, başkasının işine bakmaz.' },
+  { title: 'Elden gelen öğün olmaz, o da vaktinde bulunmaz.', meaning: 'Başkasından gelen yardım zamanında yetişmez.' },
+  { title: 'Elifin hecesi var, gündüzün gecesi var.', meaning: 'Her şeyin zıddı vardır.' },
+  { title: 'Er giden işine, geç giden boşuna.', meaning: 'İşine erken başlayan fayda görür.' },
+  { title: 'Er olan ekmeğini taştan çıkarır.', meaning: 'Yiğit, zorlukta bile ekmeğini bulur.' },
+  { title: 'Erken kalktım işime, şeker kattım aşıma.', meaning: 'Çalışkan insan kazançlı olur.' },
+  { title: 'Esirgenen göze çöp batar.', meaning: 'Çok sakınılan şey zarar görür.' },
+  { title: 'Eski çamlar bardak oldu.', meaning: 'Eskiden kalan şey artık yok.' },
+  { title: 'Eski dost düşman olmaz.', meaning: 'Gerçek dostluk bozulmaz.' },
+  { title: 'Eşeği dama çıkaran yine kendi indirir.', meaning: 'Yanlış iş yapan, sonucunu yine kendisi düzeltir.' },
+  { title: 'Eşeği düğüne çağırmışlar, “Ya odun eksik ya su.” demiş.', meaning: 'Gereksiz kimse, davette bir şey arar.' },
+  { title: 'Eşeğin kuyruğunu kalabalıkta kesme; kimi uzun der, kimi kısa.', meaning: 'İnsanların olduğu yerde iş yaparsan eleştiri çok olur.' },
+  { title: 'Eşeğin sahibinin dediği yere bağla da varsın kurt yesin.', meaning: 'İş sahibinin isteği önemlidir, sonuç kötü de olsa.' },
+  { title: 'Eşek bile bir düştüğü yere bir daha düşmez.', meaning: 'İnsan aynı hatayı iki kere yapmamalı.' },
+  { title: 'Eşek çamura çökerse sahibinden gayretlisi olmaz.', meaning: 'İnat eden, sahibini de zor durumda bırakır.' },
+  { title: 'Eşek kuyruğu gibi ne uzar ne kısalır.', meaning: 'Hiç değişmeyen, aynı kalan şey için söylenir.' },
+  { title: 'Evladın var mı, derdin var.', meaning: 'Çocuk, sevinç olduğu kadar derttir de.' },
+  { title: 'Evvel hesap, sonra kasap.', meaning: 'Önceden hesap yapılmalı, sonra iş yapılmalı.' },
+  { title: 'Evvel zaman içinde, kalbur saman içinde.', meaning: 'Masallara özgü, belirsiz geçmiş zaman ifadesi.' },
+  { title: 'Fare deliğine sığmamış bir de kuyruğuna kabak bağlamış.', meaning: 'Zaten sıkıntılı olan, daha da zorlaştırır.' },
+  { title: 'Fırsat her vakit ele geçmez.', meaning: 'Fırsatlar değerlidir, kaçırılmamalıdır.' },
+  { title: 'Fukaranın tavuğu, zenginin atı kıymetli olur.', meaning: 'Herkes elindekini değerli görür.' },
+  { title: 'Gece işi, körler işi.', meaning: 'Gece yapılan işte eksik çok olur.' },
+  { title: 'Geçti Bor’un pazarı, sür eşeğini Niğde’ye.', meaning: 'Fırsat geçince uğraş faydasızdır.' },
+  { title: 'Gelen ağam, giden paşam.', meaning: 'İnsan çıkarına göre davranır.' },
+  { title: 'Gençlikte para kazan, kocalıkta kur kazan.', meaning: 'Gençken çalış, yaşlılıkta rahat et.' },
+  { title: 'Gençlikte taş taşı, kocalıkta ye aşı.', meaning: 'Gençken çalışanın yaşlılığı rahat olur.' },
+  { title: 'Gezen kurt aç kalmaz.', meaning: 'Çalışan ve dolaşan, rızkını bulur.' },
+  { title: 'Göğe direk, denize kapak olmaz.', meaning: 'İmkânsız şeyler gerçekleşmez.' },
+  { title: 'Gökteki yıldızdan yerdeki mum iyidir.', meaning: 'Yakındaki az, uzaktaki çoktan iyidir.' },
+  { title: 'Göle su gelinceye kadar kurbağanın gözü patlar.', meaning: 'Bekleyen çok sıkıntı çeker.' },
+  { title: 'Gönlün yazı var, kışı var.', meaning: 'İnsan ruhu değişken olur.' },
+  { title: 'Gönül kimi severse güzel odur.', meaning: 'Güzellik, sevenin gözündedir.' },
+  { title: 'Gönül zenginliği, kesede değil nefestedir.', meaning: 'Asıl zenginlik, gönül zenginliğidir.' },
+  { title: 'Gönülden gönle yol vardır.', meaning: 'İçtenlik karşıya geçer.' },
+  { title: 'Gören gözün hakkı vardır.', meaning: 'Gördüğünü istemek insana doğaldır.' },
+  { title: 'Görgülü kuşlar gördüğünü işler, görmedik kuşlar ne görsün ki ne işler?', meaning: 'İnsan çevresinden öğrendiğini uygular.' },
+  { title: 'Görmemiş görmüş, güle güle ölmüş.', meaning: 'Görmemişin eline fırsat geçince ölçüsüz davranır.' },
+  { title: 'Görünen dağın uzağı olmaz.', meaning: 'Açık olan, ulaşılır görünür.' },
+  { title: 'Göz gördüğünü ister.', meaning: 'İnsan gördüğüne özenir.' },
+  { title: 'Göz görmeyince gönül katlanır.', meaning: 'Uzak olan kolay unutulur.' },
+  { title: 'Gözden ırak olan gönülden de ırak olur.', meaning: 'Uzak kalan sevilmez.' },
+  { title: 'Gözü tanede olan kuşun ayağı tuzaktan kurtulmaz.', meaning: 'Açgözlü zarar görür.' },
+  { title: 'Gün doğmadan kimliği söylenmez.', meaning: 'Erken hüküm verilmez.' },
+  { title: 'Gün geçer, kin geçmez.', meaning: 'Zaman geçer ama kin unutulmaz.' },
+  { title: 'Gün güne uymaz.', meaning: 'Her gün aynı olmaz.' },
+  { title: 'Gün olur, yılı besler; yıl olur, günü beslemez.', meaning: 'Zaman zaman küçük şey büyük fayda sağlar.' },
+  { title: 'Gün varken davarını eve götür.', meaning: 'İş, uygun zamanda yapılmalı.' },
+  { title: 'Gündüzün mum yakan geceleyin bulamaz.', meaning: 'Gereksiz yere tüketen, ihtiyaçta bulamaz.' },
+  { title: 'Güne göre kürk giyinmek gerek.', meaning: 'Duruma göre davranmak gerekir.' },
+  { title: 'Güvenme dostuna, saman doldurur postuna.', meaning: 'Dost bile bazen zarar verir.' },
+  { title: 'Güvenme varlığa, düşersin darlığa.', meaning: 'Mal mülk geçicidir.' },
+  { title: 'Güzele ne yakışmaz.', meaning: 'Güzel insana her şey yakışır.' },
+  { title: 'Hak söz ağıdan acıdır.', meaning: 'Gerçek söz hoş gelmez.' },
+  { title: 'Hâl hâlin yoldaşıdır.', meaning: 'İnsan, benzer durumda olanla dost olur.' },
+  { title: 'Hamala semeri yük olmaz.', meaning: 'Alışkın olan için iş kolaydır.' },
+  { title: 'Hangi dağda kurt öldü?', meaning: 'Beklenmedik şeyler olunca söylenir.' },
+  { title: 'Hangi gün vardır akşam olmadık.', meaning: 'Her şeyin bir sonu vardır.' },
+  { title: 'Harman dövmek keçinin işi değil.', meaning: 'Küçükten büyük iş beklenmez.' },
+  { title: 'Harman yel ile, düğün el ile.', meaning: 'İş güçle, düğün yardımla olur.' },
+  { title: 'Hasta ol benim için, öleyim senin için.', meaning: 'Abartılı sevgi ifadesi.' },
+  { title: 'Hasta olmayan, sağlığın kadrini bilmez.', meaning: 'Sağlığı hastalanınca anlar insan.' },
+  { title: 'Haydan gelen huya gider.', meaning: 'Kolay gelen mal kolay gider.' },
+  { title: 'Hayır dile komşuna, hayır gele başına.', meaning: 'İyilik isteyen iyilik bulur.' },
+  { title: 'Hayırlı komşu, hayırsız akrabadan iyidir.', meaning: 'İyi komşu, kötü akrabadan daha faydalıdır.' },
+  { title: 'Hazıra dağ dayanmaz.', meaning: 'Hazır mal da çabuk biter.' },
+  { title: 'Her aklına geleni söyleme, her gördüğünü deme.', meaning: 'Ölçüsüz konuşma zararlıdır.' },
+  { title: 'Her çok azdan olur.', meaning: 'Büyük birikim küçüklerden oluşur.' },
+  { title: 'Her dağın derdi kendine göre.', meaning: 'Herkesin sıkıntısı farklıdır.' },
+  { title: 'Her damardan kan alınmaz.', meaning: 'Her şeyden fayda sağlanmaz.' },
+  { title: 'Her düşüş, bir öğreniş.', meaning: 'Hata, öğreticidir.' },
+  { title: 'Her elde kılıç olmaz, her kılıçla da iş görülmez.', meaning: 'Herkes iş yapamaz.' },
+  { title: 'Her gönülde bir arslan yatar.', meaning: 'Her insanın içinde bir güç vardır.' },
+  { title: 'Her gün bir olmaz.', meaning: 'Günler aynı geçmez.' },
+  { title: 'Her güzelin bir kusuru vardır.', meaning: 'Kusursuz kimse yoktur.' },
+  { title: 'Her işin başı sağlık.', meaning: 'Sağlık olmadan hiçbir iş olmaz.' },
+  { title: 'Her kaşığın kısmeti bir olmaz.', meaning: 'Herkesin rızkı farklıdır.' },
+  { title: 'Her koyun kendi bacağından asılır.', meaning: 'Herkes kendi yaptığının cezasını çeker.' },
+  { title: 'Her şeyin vakti var, horoz bile vaktinde öter.', meaning: 'Her şey zamanında yapılır.' },
+  { title: 'Her şeyin yenisi, dostun eskisi.', meaning: 'Yeni şey kıymetlidir, dostluk ise eskisiyle değerlidir.' },
+  { title: 'Her taş baş yarmaz.', meaning: 'Her şey tehlikeli değildir.' },
+  { title: 'Her yokuşun bir inişi, her inişin bir yokuşu vardır.', meaning: 'Hayat inişli çıkışlıdır.' },
+  { title: 'Her zaman gemicinin istediği rüzgâr esmez.', meaning: 'Her şey istenildiği gibi gitmez.' },
+  { title: 'Her ziyan bir öğüttür.', meaning: 'Zarar, ders verir.' },
+  { title: 'Herkes kaşık yapar ama sapını ortaya getiremez.', meaning: 'Herkes iş yapar ama ustalık herkesin değildir.' },
+  { title: 'Herkes davul çalar ama çomağı makama uyduramaz.', meaning: 'İşin kolayını herkes yapar, ustalığını az kişi bilir.' },
+  { title: 'Herkes evinde ağadır.', meaning: 'Herkes kendi yerinde güçlüdür.' },
+  { title: 'Herkes kendi ayıbını bilmez.', meaning: 'İnsan başkasının kusurunu görür, kendininkini görmez.' },
+  { title: 'Herkes kendi ölüsü için ağlar.', meaning: 'İnsan en çok kendi derdiyle ilgilenir.' },
+  { title: 'Herkes ne ederse kendine eder.', meaning: 'İnsan yaptığının karşılığını görür.' },
+  { title: 'Herkesin ağzı torba değil ki büzesin.', meaning: 'İnsanların konuşması engellenemez.' },
+  { title: 'Herkesin bir derdi var, değirmencininki su.', meaning: 'Herkesin farklı sıkıntısı vardır.' },
+  { title: 'Herkesin ettiği yoluna gelir.', meaning: 'İnsan yaptığı iyilik veya kötülüğün karşılığını görür.' },
+  { title: 'Herkesin geçtiği köprüden sen de geç.', meaning: 'Gelenek ve deneyimden sapma.' },
+  { title: 'Herkesin tenceresi kapalı kaynar.', meaning: 'Herkesin derdi gizlidir.' },
+  { title: 'Hesabı pak olanın, yüzı ak olur.', meaning: 'İşini düzgün yapan rahat eder.' },
+  { title: 'Hiç yoktan iyidir.', meaning: 'Az da olsa olması, olmamasından iyidir.' },
+  { title: 'Horoz ölür, gözü çöplükte kalır.', meaning: 'İnsan, sevdiği şeyden vazgeçemez.' },
+  { title: 'Horozu çok olan köyde sabah geç olur.', meaning: 'İşin çok sorumlusu olursa iş gecikir.' },
+  { title: 'Huy canın altındadır.', meaning: 'İnsan huyunu kolay değiştirmez.' },
+  { title: 'Irmak kenarına çeşme yapılmaz.', meaning: 'Gereksiz iş yapılmaz.' },
+  { title: 'Irmaktan geçerken at değiştirilmez.', meaning: 'İş ortasında karar değişmez.' },
+  { title: 'Isıracak it dişini göstermez.', meaning: 'Tehlikeli kişi sessizdir.' },
+  { title: 'İbadet de gizli, kabahat de.', meaning: 'Hem iyilik hem kötülük gizli yapılmalıdır.' },
+  { title: 'İğneyi kendine, çuvaldızı başkasına batır.', meaning: 'Önce kendini eleştir.' },
+  { title: 'İki cambaz bir ipte oynamaz.', meaning: 'İki usta aynı işi yapamaz.' },
+  { title: 'İki dinle, bir söyle.', meaning: 'Çok dinle, az konuş.' },
+  { title: 'İki el bir baş için.', meaning: 'İnsan tek başına yaşar.' },
+  { title: 'İki karpuz bir koltuğa sığmaz.', meaning: 'Aynı anda iki iş olmaz.' },
+  { title: 'İki kulak bir dil için.', meaning: 'Çok dinlemek, az konuşmak gerekir.' },
+  { title: 'İkisini bir kazana koysalar kaynamazlar.', meaning: 'Uyuşmaz kişiler anlaşamaz.' },
+  { title: 'İnsan beşer, kuldur şaşar.', meaning: 'İnsan hata yapar.' },
+  { title: 'İnsan çeşit çeşit, yer damar damar.', meaning: 'İnsanların huyu farklıdır.' },
+  { title: 'İnsan gönlünün artığını söyler.', meaning: 'İnsan içinde olanı dile getirir.' },
+  { title: 'İnsan kendini beğenmese çatlar.', meaning: 'İnsan kendini beğenir.' },
+  { title: 'İnsan kıymetini insan bilir.', meaning: 'Değer, başkaları tarafından bilinir.' },
+  { title: 'İnsan yanıla yanıla, pehlivan yenile yenile.', meaning: 'Hata yaparak öğrenilir.' },
+  { title: 'İnsanı yolda, yiğidi darda tanırsın.', meaning: 'İnsan zor durumda belli olur.' },
+  { title: 'İnsanın eti yenmez, derisi giyilmez; tatlı dilinden başka nesi var.', meaning: 'İnsan, güzel söz ve gönül alıcı davranışlarıyla değer kazanır.' },
+  { title: 'İnsanlık sende kalsın.', meaning: 'Kötülüğe karşı iyiliği elden bırakma, insanca davranmayı sürdür.' },
+  { title: 'İnsanoğlu çiğ süt emmiş.', meaning: 'İnsan hata yapmaya ve nankörlüğe eğilimlidir.' },
+  { title: 'İsin yanına varan is, misin yanına varan mis kokar.', meaning: 'İnsan, arkadaşlık ettiği kişiye benzer.' },
+  { title: 'İstemem diyenden korkmalı.', meaning: 'İstemediğini söyleyen kişi aslında en çok isteyen olabilir.' },
+  { title: 'İş bilenin, kılıç kuşananın.', meaning: 'Başarı, işi bilen ve hazırlıklı olanın olur.' },
+  { title: 'İşten artmaz, dişten artar.', meaning: 'Kazanç değil, tasarruf biriktirmeyi sağlar.' },
+  { title: 'İti an, çomağı hazırla.', meaning: 'Kötü insandan söz edilince hemen hazır olmak gerekir.' },
+  { title: 'İtle yatan bitle kalkar.', meaning: 'Kötü kimselerle düşüp kalkan, onların zararını görür.' },
+  { title: 'İyi gitmeyince kişinin işi, muhallebi yerken kırılır dişi.', meaning: 'Talihsizlik, en kolay işte bile ortaya çıkar.' },
+  { title: 'İyi insan sözünün üstüne gelir.', meaning: 'İyi insanlardan söz edilince hemen yanımıza gelirler.' },
+  { title: 'İyiliğe “Nereye gidiyorsun?” demişler, “Kötülüğe.” demiş.', meaning: 'Karşılığı olmayan iyilik kötülüğe dönüşür.' },
+  { title: 'İyiliğe iyilik olsaydı, koca öküz’e bıçak olmazdı.', meaning: 'Her yapılan iyilik karşılık bulmaz.' },
+  { title: 'İyilik eden, kapıda kalmaz.', meaning: 'İyilik yapanın işi rast gider, sıkıntıya düşmez.' },
+  { title: 'İyilik et kele, övünsün ele.', meaning: 'Yaptığın iyiliği başkasına anlatma, gösteriş için yapma.' },
+  { title: 'İyilikten maraz doğar.', meaning: 'Aşırı veya yanlış iyilik zarar getirebilir.' },
+  { title: 'Kabiliyetli çırak ustayı geçer.', meaning: 'Yetenekli kişi, hocasından daha başarılı olabilir.' },
+  { title: 'Kaçan balık büyük olur.', meaning: 'Elde edilemeyen şey, hep daha değerli görünür.' },
+  { title: 'Kalbi yıkmak kolay, yapmak zordur.', meaning: 'İnsan gönlünü kırmak basittir, ama onarmak zordur.' },
+  { title: 'Kalıp kıyafetle adam adam olmaz.', meaning: 'İnsan değerini dış görünüşle kazanmaz.' },
+  { title: 'Kanatsız kuş uçmaz.', meaning: 'Her işin bir gerekliliği vardır; araçsız amaca ulaşılamaz.' },
+  { title: 'Kara gün kararıp kalmaz.', meaning: 'Kötü günler elbet sona erer.' },
+  { title: 'Kara haber tez duyulur.', meaning: 'Kötü haberler hızla yayılır.' },
+  { title: 'Kara yaslanma, kar erir; ere yaslanma, er ölür.', meaning: 'Dayanılacak şeyler de insan da kalıcı değildir.' },
+  { title: 'Karaman’ın koyunu sonra çıkar oyunu.', meaning: 'Bazı gerçekler ve işler geç de olsa ortaya çıkar.' },
+  { title: 'Kardı bağım malım, gelirdi kardeşlerim; tükendi yağım balım, gelmiyor kardeşlerim.', meaning: 'Varlık zamanında akrabalar yakın olur, yoklukta ilgilenmezler.' },
+  { title: 'Karga mandayı babası hayrına bitlemez.', meaning: 'Kimse karşılıksız iyilik yapmaz.' },
+  { title: 'Karga yavrusuna bakmış \'benim ak pak evladım\' demiş.', meaning: 'Her anne, yavrusunu en güzel görür.' },
+  { title: 'Karınca kanatlanınca serçe oldum sanır.', meaning: 'Küçük biri biraz güç bulunca kendini büyük sanır.' },
+  { title: 'Karpuz kabuğunu görmeden denize girme.', meaning: 'İşe, zamanı ve koşulu gelmeden kalkışma.' },
+  { title: 'Kartala bir ok değmiş, yine kendi yeleğinden.', meaning: 'İnsan çoğu zaman yakınlarından zarar görür.' },
+  { title: 'Kaş ile göz, gerisi söz.', meaning: 'Anlamlı bakışlar sözden etkilidir.' },
+  { title: 'Kavak, yaprağını tepeden dökerse kış çok olur.', meaning: 'Doğa işaretleri yaklaşan mevsimi gösterir.' },
+  { title: 'Kavun, karpuz yata yata büyür.', meaning: 'İnsan da dinlenerek, uygun ortamda gelişir.' },
+  { title: 'Kaya uçmazsa dere dolmaz.', meaning: 'Büyük olaylar küçük sebepler olmadan yaşanmaz.' },
+  { title: 'Kaybolan koyunun kuyruğu büyük olur.', meaning: 'Kaybedilen şey, olduğundan değerli görülür.' },
+  { title: 'Kaynayan kazan kapak tutmaz.', meaning: 'İçinde gizli bir durum olan ortaya çıkar.' },
+  { title: 'Kaz gelecek yerden tavuk esirgenmez.', meaning: 'Büyük kazanç için küçük fedakârlık yapılır.' },
+  { title: 'Kazma elin kuyusunu, kazarlar kuyunu.', meaning: 'Başkasına kötülük eden, kötülüğü kendine yapmış olur.' },
+  { title: 'Keçi geberse de kuyruğunu indirmez.', meaning: 'Bazı kişiler inatlarından asla vazgeçmez.' },
+  { title: 'Kedi olalı bir fare tuttu.', meaning: 'Çok zamandır faydasız olan, bir kere iş yapınca övünür.' },
+  { title: 'Kedi uzanamadığı ciğere murdar dermiş.', meaning: 'Elde edemediği şeyi kötülemek insan tabiatıdır.' },
+  { title: 'Kel yanında kabak anılmaz.', meaning: 'Kusuru olanın yanında benzer kusur söylenmez.' },
+  { title: 'Kelin ayıbını takke örter.', meaning: 'İnsan kusurlarını saklamaya çalışır.' },
+  { title: 'Kelin merhemi olsa başına sürer.', meaning: 'Kendi derdine çare bulamayan, başkasına fayda veremez.' },
+  { title: 'Kendi düşen ağlamaz.', meaning: 'İnsan, kendi hatasının sonucuna katlanır.' },
+  { title: 'Kendi söyler, kendi dinler.', meaning: 'Bazıları sadece kendisiyle ilgilenir, başkasını dinlemez.' },
+  { title: 'Keskin sirke küpüne zarar.', meaning: 'Öfke ve hırs sahibine zarar verir.' },
+  { title: 'Kılık kıyafetle adam adam olmaz.', meaning: 'İnsan değerini dış görünüşle ölçülmez.' },
+  { title: 'Kırkından sonra saza başlayan kıyamette çalar.', meaning: 'Yaş ilerledikten sonra yeni işlere girişen başarılı olamaz.' },
+  { title: 'Kısmet ise gelir Hint’ten Yemen’den, kısmet değilse ne gelir elden.', meaning: 'Alın yazısı değişmez.' },
+  { title: 'Kısmetinde ne varsa kaşığında o çıkar.', meaning: 'Herkes kendi rızkını yer.' },
+  { title: 'Kısmetten fazlası olmaz.', meaning: 'Herkesin nasibi bellidir, fazlasını alamaz.' },
+  { title: 'Kimin arabasına binerse onun türküsünü çağırır.', meaning: 'Geçimini sağlayan kişiye boyun eğmek zorunda olunur.' },
+  { title: 'Kiminin parası, kiminin duası.', meaning: 'Herkesin katkısı farklıdır.' },
+  { title: 'Kimse bilmez, kim kazana kim yiye.', meaning: 'Kimin ne nasip alacağı bilinmez.' },
+  { title: 'Kimse yoğurdum ekşi demez.', meaning: 'Herkes kendi malını, işini övmek ister.' },
+  { title: 'Kimseden kimseye hayır yok.', meaning: 'Herkes kendi derdindedir.' },
+  { title: 'Kimsenin ahı kimsede kalmaz.', meaning: 'Haksızlık yapanın karşılığı mutlaka çıkar.' },
+  { title: 'Kişi ektiğini biçer.', meaning: 'İnsan ne yaparsa karşılığını görür.' },
+  { title: 'Kişiyi nasıl bilirsin, kendin gibi.', meaning: 'İnsan başkasını kendi ölçüsüne göre değerlendirir.' },
+  { title: 'Komşuda pişer, bize de düşer.', meaning: 'Komşunun nimetinden başkası da yararlanır.' },
+  { title: 'Korkak bezirgân ne kâr eder ne zarar.', meaning: 'Cesareti olmayan kimse kazanç da sağlayamaz.' },
+  { title: 'Koyun can derdinde, kasap yağ derdinde.', meaning: 'Birinin derdi başkayken diğerinin çıkar peşinde olması.' },
+  { title: 'Koyunun bulunmadığı yerde keçiye Abdurrahman Çelebi derler.', meaning: 'Değersiz kişi, daha iyisi olmayınca değer görür.' },
+  { title: 'Köpek suya düşmeyince yüzmeyi öğrenmez.', meaning: 'İnsan zor duruma düşmeden bazı şeyleri öğrenemez.' },
+  { title: 'Köpek, ekmek veren kapıyı tanır.', meaning: 'İnsan, kendisine iyilik yapanı unutmamalıdır.' },
+  { title: 'Köpekle dalaşmaktan çalıyı dolaşmak yeğdir.', meaning: 'Değmez kişilerle uğraşmamak daha iyidir.' },
+  { title: 'Kör kuşun yuvasını Allah yapar.', meaning: 'Aciz olana bile Tanrı yardım eder.' },
+  { title: 'Körle yatan, şaşı kalkar.', meaning: 'İnsan kötü arkadaşın huyunu kapar.' },
+  { title: 'Körler memleketinde tek gözlü kraldır.', meaning: 'Yetersiz ortamda biraz yetenekli olan üstün sayılır.' },
+  { title: 'Körün istediği bir göz, iki olursa ne söz.', meaning: 'İsteklerin fazlasıyla gerçekleşmesi mutluluk verir.' },
+  { title: 'Körün istediği iki göz, biri ela biri boz.', meaning: 'İnsan bazen gereğinden fazlasını ister.' },
+  { title: 'Kös dinleyen davula kulak vermez.', meaning: 'Büyük işe alışan küçükle ilgilenmez.' },
+  { title: 'Kötü komşu insanı mal sahibi eder.', meaning: 'İyi komşu olmayınca, insan kendi malını edinir.' },
+  { title: 'Kötü söyleme eşine, ağu katar aşına.', meaning: 'Eşine kötü söz söyleme, evin huzuru bozulur.' },
+  { title: 'Kötü söz insanı dininden çıkarır.', meaning: 'Sert sözler kişiyi incitir, ağır sonuçlar doğurur.' },
+  { title: 'Kötülük her kişinin kârı, iyilik er kişinin kârı.', meaning: 'Kötülük yapmak kolaydır, asıl erdem iyilik yapmaktır.' },
+  { title: 'Kucağı dolu olanın, ocağı yanar.', meaning: 'Aşırı mal mülk dert getirir.' },
+  { title: 'Kulaktan burun yakın, kardeşten karın yakın.', meaning: 'Bazı akrabalıklardan çok eş daha yakındır.' },
+  { title: 'Kurcalama sivilceyi, çıban edersin.', meaning: 'Ufak meseleyi kurcalarsan bırak.' },
+  { title: 'Kurda “Neden boynun kalın?” demişler, “İşimi kendim görürüm de ondan.” demiş.', meaning: 'Güçlü olmanın sebebi kendi işini görmekte gizlidir.' },
+  { title: 'Kurt dumanlı havayı sever.', meaning: 'Kötü kişiler kargaşa ortamından faydalanır.' },
+  { title: 'Kurt kocayınca köpeğin maskarası olur.', meaning: 'Gücünü yitiren alay konusu olur.' },
+  { title: 'Kurt tüyünü değiştirir, huyunu değiştirmez.', meaning: 'İnsan alışkanlıklarından kolay vazgeçmez.' },
+  { title: 'Kurtla görüşürsen köpeği yanından ayırma.', meaning: 'Tehlikeli kişiyle uğraşırken tedbirli ol.' },
+  { title: 'Kuru gayret çarık eskitir.', meaning: 'Çabasız, plansız iş emek boşa harcanır.' },
+  { title: 'Kusursuz dost arayan dostsuz kalır.', meaning: 'İnsan kusur ararsa dost bulamaz.' },
+  { title: 'Kutlu gün doğuşundan bellidir.', meaning: 'İyi olacak iş daha başından belli olur.' },
+  { title: 'Kuyunun suyu çoksa kovayla almayı bilene.', meaning: 'Bolluk bile doğru kullanılmazsa işe yaramaz.' },
+  { title: 'Kuzguna yavrusu şahin görünür.', meaning: 'Her anne çocuğunu en üstün görür.' },
+  { title: 'Küstüğün dağın odununu kesme.', meaning: 'Düşmanlık ettiğinle iş yapma.' },
+  { title: 'Leyleği kuştan mı sayarsın; yazın gelir, kışın gider.', meaning: 'Sürekli yer değiştiren kimseye güven olmaz.' },
+  { title: 'Mal adama hem dost hem düşmandır.', meaning: 'Mal bazen fayda, bazen zarar getirir.' },
+  { title: 'Marifet iltifata tabidir.', meaning: 'İnsan becerisi takdir gördükçe artar.' },
+  { title: 'Mart kuruluk, nisan yağmurluk.', meaning: 'Doğanın dengesine dikkat çekilir.' },
+  { title: 'Martta yağmaz, nisanda dinmezse sabanlar altın olur.', meaning: 'Bereket için zamanında yağmur gerekir.' },
+  { title: 'Maşa varken elini ateşe sokma.', meaning: 'Dolaylı yol varken tehlikeye atılma.' },
+  { title: 'Mayasız yoğurt tutmaz.', meaning: 'Her işin bir gereği vardır.' },
+  { title: 'Merak insanı mezara sokar.', meaning: 'Aşırı merak insana zarar verir.' },
+  { title: 'Meramın elinden bir şey kurtulmaz.', meaning: 'İstekli kişi işini başarır.' },
+  { title: 'Merhametten maraz doğar.', meaning: 'Gereksiz acıma zarar getirir.' },
+  { title: 'Meyveli ağacı taşlarlar.', meaning: 'Başarılı kişi kıskanılır.' },
+  { title: 'Minare de doğru ama içi eğri.', meaning: 'Dıştan doğru görünen, içten bozuk olabilir.' },
+  { title: 'Minareyi çalan kılıfını hazırlar.', meaning: 'Suç işleyen bahanesini önceden hazırlar.' },
+  { title: 'Minareyi yaptırmayan yerden bitmiş sanır.', meaning: 'Çaba göstermeyen, sonucu kolay sanır.' },
+  { title: 'Mum dibine ışık vermez.', meaning: 'İnsan yakınındakine fayda sağlayamaz.' },
+  { title: 'Mühür kimde ise Süleyman odur.', meaning: 'Yetki kimdeyse söz onda olur.' },
+  { title: 'Nasihat istersen tembele iş buyur.', meaning: 'Tembel, işi yapmamak için çok öğüt verir.' },
+  { title: 'Ne dilersen eşine, o gelir başına.', meaning: 'Başkasına dilediğin, sana döner.' },
+  { title: 'Ne doğrarsan aşına, o çıkar kaşığına.', meaning: 'Ne yaparsan karşılığını görürsün.' },
+  { title: 'Ne karanlıkta yat ne kara düş gör.', meaning: 'Kötü şeylerden uzak dur.' },
+  { title: 'Ne oldum dememeli, ne olacağım demeli.', meaning: 'İnsan kibirlenmemeli, geleceğini düşünmeli.' },
+  { title: 'Ne verirsen elinle, o gelir seninle.', meaning: 'Eline geçen mal paylaşılırsa kalıcı olur.' },
+  { title: 'Ne yavuz ol asıl, ne yavaş ol basıl.', meaning: 'Ne çok sert ol, ne çok yumuşak.' },
+  { title: 'Nefesine güvenen borazancıbaşı olur.', meaning: 'İnsan yeteneğine güvenince iş başarır.' },
+  { title: 'Nerede birlik, orada dirlik.', meaning: 'Birlik olan yerde huzur olur.' },
+  { title: 'On para on aslanın ağzında.', meaning: 'Kazanç elde etmek çok zordur.' },
+  { title: 'Otuz iki dişten çıkan, otuz iki mahalleye yayılır.', meaning: 'Ağızdan çıkan söz hızla yayılır.' },
+  { title: 'Oynamasını bilmeyen kız ‘Yerim dar.’ demiş; yerini genişletmişler, ‘Gerim dar.’ demiş.', meaning: 'Beceriksiz kişi bahane bulur.' },
+  { title: 'Ödünç güle güle gider, ağlaya ağlaya gelir.', meaning: 'Borç kolay alınır, zor ödenir.' },
+  { title: 'Öfke baldan tatlıdır.', meaning: 'İnsan bazen öfkeden haz duyar.' },
+  { title: 'Öfke ile kalkan ziyanla oturur.', meaning: 'Öfkeyle iş yapan zarar görür.' },
+  { title: 'Öğrenmenin yaşı yoktur.', meaning: 'İnsan her yaşta öğrenebilir.' },
+  { title: 'Öküze boynuzu yük olmaz.', meaning: 'Güçlüye yük ağır gelmez.' },
+  { title: 'Ölmüş eşek kurttan korkmaz.', meaning: 'Kaybedecek şeyi olmayan korkmaz.' },
+  { title: 'Ölmüş koyun kurttan korkmaz.', meaning: 'Zararı görmüş kimse artık korkmaz.' },
+  { title: 'Ön tekerlek nereye giderse arka tekerlek de oraya gider.', meaning: 'Büyüklerin yolu küçüklere örnek olur.' },
+  { title: 'Önüne geleni kapar, ardına geleni teper.', meaning: 'Açgözlü insan fırsat tanımaz.' },
+  { title: 'Pahalı alan aldanmaz.', meaning: 'Kaliteli mal pahalı olur ama değeri vardır.' },
+  { title: 'Para isteme benden, buz gibi soğurum senden.', meaning: 'Para isteyen dostluğunu kaybeder.' },
+  { title: 'Parası ucuz olanın kendisi kıymetli olur.', meaning: 'Değersiz malı olan kıymetli kişi olabilir.' },
+  { title: 'Paylaştıkça çoğalır, bölüştükçe bereket artar.', meaning: 'Paylaşmak bereketi artırır.' },
+  { title: 'Pireye kızıp yorgan yakılmaz.', meaning: 'Küçük şeye kızıp büyük zarara girilmez.' },
+  { title: 'Rüzgâr eken fırtına biçer.', meaning: 'Kötülük yapan daha büyüğünü bulur.' },
+  { title: 'Rüzgâr esemeyince yaprak oynamaz.', meaning: 'Her olayın bir sebebi vardır.' },
+  { title: 'Rüzgâra tüküren, kendi yüzüne tükürür.', meaning: 'Doğaya karşı koyan kendine zarar verir.' },
+  { title: 'Rüzgârın önüne düşmeyen yorulur.', meaning: 'İşini kolaylaştırmazsan yorulursun.' },
+  { title: 'Rüzgârlı havanın kuytusu, yağmurlu havanın uykusu.', meaning: 'Doğa olaylarının etkileri farklıdır.' },
+  { title: 'Sabreyle işine, hayır gelsin başına.', meaning: 'Sabırla yapılan işten iyi sonuç alınır.' },
+  { title: 'Sabrın sonu selamettir.', meaning: 'Sabreden sonunda huzura kavuşur.' },
+  { title: 'Sadık dost akrabadan yeğdir.', meaning: 'Gerçek dost, akrabadan daha değerlidir.' },
+  { title: 'Sağ olsun da dağ ardında olsun.', meaning: 'Yaşamak, yakın olmaktan daha önemlidir.' },
+  { title: 'Sağlam baş yastık istemez.', meaning: 'Sağlıklı insanın özel şeye ihtiyacı olmaz.' },
+  { title: 'Sana taşla vurana sen aşla var.', meaning: 'Kötülüğe iyilikle karşılık ver.' },
+  { title: 'Sana vereyim bir öğüt, kendi ununu kendin öğüt.', meaning: 'İşini başkasına bırakma.' },
+  { title: 'Sanat altın bileziktir.', meaning: 'Meslek insan için en değerli servettir.' },
+  { title: 'Sanatı ustadan görmeyen öğrenmez.', meaning: 'Sanat, ustadan öğrenilir.' },
+  { title: 'Sanatını hor gören, boğazına torba takar.', meaning: 'Mesleğini küçümseyen, geçimini sağlayamaz.' },
+  { title: 'Sayılı günler tez geçer.', meaning: 'Günler çabuk geçer.' },
+  { title: 'Sebepsiz kuş bile uçmaz.', meaning: 'Her şeyin bir nedeni vardır.' },
+  { title: 'Sel ile gelen, yel ile gider.', meaning: 'Çabuk kazanılan çabuk kaybedilir.' },
+  { title: 'Selam para, kelam para.', meaning: 'Her şeyin değeri vardır.' },
+  { title: 'Selam verdik, borçlu çıktık.', meaning: 'İyilik yaparken suçlu duruma düşmek.' },
+  { title: 'Sen bilirsin deyince kavga olmaz.', meaning: 'Kararı karşı tarafa bırakınca tartışma çıkmaz.' },
+  { title: 'Sen dost kazan, düşman ocağın başından çıkar.', meaning: 'Dost edinmek düşmanlığı önler.' },
+  { title: 'Sen işten korkma, iş senden korksun.', meaning: 'İşini güvenle yap.' },
+  { title: 'Sofrada elini, mecliste dilini sakla.', meaning: 'Yeme yerinde görgülü, konuşmada ölçülü ol.' },
+  { title: 'Sona kalan dona kalır.', meaning: 'İşe geç kalan kaybeder.' },
+  { title: 'Sora sora Bağdat bulunur.', meaning: 'Soru sorarak doğruyu bulursun.' },
+  { title: 'Soran yanılmamış.', meaning: 'Bilmediğini soran hata yapmaz.' },
+  { title: 'Söyleyenden dinleyen arif gerek.', meaning: 'Sözün kıymeti anlayanla ortaya çıkar.' },
+  { title: 'Söz ağızdan çıkar.', meaning: 'Söz çıkınca geri dönmez.' },
+  { title: 'Söz dediğin yaş deridir, nereye çekersen oraya gider.', meaning: 'Söz, yoruma açıktır.' },
+  { title: 'Söz gümüş ise sükût altındır.', meaning: 'Susmak, konuşmaktan daha değerlidir.' },
+  { title: 'Söz ile pilav pişmez.', meaning: 'İş, sözle değil emekle yapılır.' },
+  { title: 'Söz var, gelir geçer; söz var, deler geçer.', meaning: 'Sözün etkisi farklıdır.' },
+  { title: 'Söz var, iş bitirir; söz var, baş yitirir.', meaning: 'Söz, iyi de kötü de sonuç doğurur.' },
+  { title: 'Söz verme, verdinse dönme.', meaning: 'Verilen söz tutulmalıdır.' },
+  { title: 'Sözü söyle alana, kulağında kalana.', meaning: 'Sözü anlayacak kişiye söyle.' },
+  { title: 'Su akar, yatağını bulur.', meaning: 'İş, sonunda olması gerektiği gibi olur.' },
+  { title: 'Su akarken testini doldur.', meaning: 'Fırsat varken değerlendir.' },
+  { title: 'Su aktığı yere akar.', meaning: 'İnsan tabiatından vazgeçmez.' },
+  { title: 'Su içene yılan bile dokunmaz.', meaning: 'Su içenin hakkı vardır, dokunulmaz.' },
+  { title: 'Su küçüğün, söz büyüğün.', meaning: 'Küçüğe hürmet, büyüğe söz hakkı verilir.' },
+  { title: 'Su uyur, düşman uyumaz.', meaning: 'Düşmandan her zaman çekinmek gerekir.' },
+  { title: 'Suyun duru olanından, insanın yere bakanından korkun.', meaning: 'Görünüşte sakin olan tehlikeli olabilir.' },
+  { title: 'Sükût ikrardan gelir.', meaning: 'Susmak, kabul anlamına gelir.' },
+  { title: 'Süs ile salkım bir olur mu?', meaning: 'Gösteriş, asıl değerle bir tutulmaz.' },
+  { title: 'Sütle giren huy, canla çıkar.', meaning: 'İnsan huyu ölmeden değişmez.' },
+  { title: 'Sütsüz koyun meleyen olur.', meaning: 'Değersiz olan çok konuşur.' },
+  { title: 'Şimşek çakmadan gök gürlemez.', meaning: 'Olaylar birdenbire çıkmaz.' },
+  { title: 'Tahtı olmayan da kral gibi yaşar.', meaning: 'Herkes imkânınca mutlu olabilir.' },
+  { title: 'Taş düştüğü yerde kalır.', meaning: 'Sorun çıktığı yerde çözülür.' },
+  { title: 'Tayfanın akıllısı, geminin dümeninden uzak durur.', meaning: 'Bilgili kişi tehlikeli işe karışmaz.' },
+  { title: 'Temiz iş altı ayda çıkar.', meaning: 'Düzgün iş zaman alır.' },
+  { title: 'Tencere tava, herkeste bir hava.', meaning: 'Herkesin farklı huyu vardır.' },
+  { title: 'Terazi var, tartı var, her şeyin bir vakti var.', meaning: 'Her şeyin ölçüsü ve zamanı vardır.' },
+  { title: 'Testi kırıldıktan sonra yol gösteren çok olur.', meaning: 'İş bittikten sonra öğüt vermek kolaydır.' },
+  { title: 'Tırnağın varsa başını kaşı.', meaning: 'Kendi işini kendin gör.' },
+  { title: 'Tilkiye “Tavuk kebabı yer misin?” demişler, “Adamın güleceğini getiriyorsunuz.” demiş.', meaning: 'Açgözlüye sorulan soru gereksizdir.' },
+  { title: 'Tok ağırlaması güçtür.', meaning: 'Tok kişiyi ağırlamak zordur.' },
+  { title: 'Tok iken yemek yiyen, mezarını dişiyle kazar.', meaning: 'Gereksiz yemek zararlıdır.' },
+  { title: 'Toprağı işleyen, ekmeği dişler.', meaning: 'Çalışan emeğinin karşılığını alır.' },
+  { title: 'Tuz ekmek hakkını bilmeyen kör olur.', meaning: 'İyiliği bilmeyen kötülük görür.' },
+  { title: 'Ucuzdur vardır illeti, pahalıdır vardır hikmeti.', meaning: 'Fiyatın bir sebebi vardır.' },
+  { title: 'Uçan kuş aç kalmaz.', meaning: 'Rızkı olan bir şekilde doyurulur.' },
+  { title: 'Ulu sözü dinlemeyen, uluyakalır.', meaning: 'Büyüklerin sözünü dinlemeyen zor durumda kalır.' },
+  { title: 'Ulular köprü olsa, basıp geçme.', meaning: 'Büyükleri küçümseme.' },
+  { title: 'Umut, fakirin ekmeğidir.', meaning: 'Fakir, umutla yaşar.' },
+  { title: 'Usta maymun kamçı istemez.', meaning: 'İşini bilen denetime ihtiyaç duymaz.' },
+  { title: 'Ustanın çekici bin altın.', meaning: 'Ustanın emeği değerlidir.' },
+  { title: 'Uşağı işe koş, sen de ardına düş.', meaning: 'İş verdiğini takip et.' },
+  { title: 'Uzak menzile yavaş gitmeli.', meaning: 'Büyük hedefe yavaş ilerlenir.' },
+  { title: 'Üzümünü ye de bağını sorma.', meaning: 'Nimetini kullan, kaynağına karışma.' },
+  { title: 'Vakit nakittir.', meaning: 'Zaman çok değerlidir.' },
+  { title: 'Var varlatır, yok söyletir.', meaning: 'Varlık kibir, yokluk dert getirir.' },
+  { title: 'Var ne bilsin yok hâlinden.', meaning: 'Varlık içinde olan, yokluk çekenin hâlini anlayamaz.' },
+  { title: 'Vardığın yer körse, sen de bir gözünü kapa.', meaning: 'Uyumlu olmak için ortamına göre davran.' },
+  { title: 'Varlık çoklukta değil, huzurdadır.', meaning: 'Asıl zenginlik iç huzurudur.' },
+  { title: 'Veren el, alan elden üstündür.', meaning: 'Veren, alan kişiden daha değerlidir.' },
+  { title: 'Verirsen veresiye, batarsın kara suya.', meaning: 'Borca mal vermek zarar ettirir.' },
+  { title: 'Yabancı koyun kenara yatar.', meaning: 'Yabancı, bulunduğu yerde dışlanır.' },
+  { title: 'Yabancı köpek yedi mahalleden kovulur.', meaning: 'Yabancı kişi kolay kolay kabul edilmez.' },
+  { title: 'Yabancı kuşun başı kanadı altında olur.', meaning: 'Yabancı, kendi içinde korunmaya çalışır.' },
+  { title: 'Yağına kıymayan, çöreğini yavan yer.', meaning: 'Gerekli masraf yapılmazsa sonuç iyi olmaz.' },
+  { title: 'Yakın dost uzak hısımdan yeğdir.', meaning: 'Samimi dost, akrabadan daha değerlidir.' },
+  { title: 'Yalancının evi yanmış, kimse inanmamış.', meaning: 'Sürekli yalan söyleyenin doğru sözüne güven olmaz.' },
+  { title: 'Yalancının mumu yatsıya kadar yanar.', meaning: 'Yalanın ömrü kısadır, ortaya çıkar.' },
+  { title: 'Yalnız taş duvar olmaz.', meaning: 'Birlik olmadan iş başarılamaz.' },
+  { title: 'Yanık yerin otu tez biter.', meaning: 'Dertli kişi kolayca teselli bulur.' },
+  { title: 'Yaralı kuşa kurşun sıkılmaz.', meaning: 'Zayıfa, dertli olana yüklenilmez.' },
+  { title: 'Yarınki kazdan bugünkü tavuk yeğdir.', meaning: 'Elindekini tercih et, olmayacak söze güvenme.' },
+  { title: 'Yaşı at pazarında sorarlar.', meaning: 'Kişinin değeri, tecrübesiyle ölçülür.' },
+  { title: 'Yaşın yanında kuru da yanar.', meaning: 'Suçsuz olan da suçluyla birlikte zarar görür.' },
+  { title: 'Yatan aslandan, gezen tilki yeğdir.', meaning: 'Çalışan, güçlüden üstündür.' },
+  { title: 'Yavru kuş, yuvada gördüğünü yapar.', meaning: 'Çocuk, aileden gördüğünü uygular.' },
+  { title: 'Yay elde, ok yerde; atmasını bilmeyene ne gerek.', meaning: 'Bilgisiz kişiye mal fayda sağlamaz.' },
+  { title: 'Yaz yalan, kış gerçek.', meaning: 'Yazın bolluk vardır, kışın zorluk.' },
+  { title: 'Yazın araması, kışın taraması olmazsa herkes besler mandayı.', meaning: 'Önlem alınmazsa iş aksar.' },
+  { title: 'Yazın başı pişenin, kışın aşı pişer.', meaning: 'Yazın çalışan kışın rahat eder.' },
+  { title: 'Yazın gölge hoş, kışın çuval boş.', meaning: 'Yazın bolluk, kışın sıkıntı olur.' },
+  { title: 'Yazın gölge kovan, kışın karın ovar.', meaning: 'Yazın çalışmayan, kışın sıkıntı çeker.' },
+  { title: 'Yazın sıcakta terleyen, kışın soğukta üşümez.', meaning: 'Çalışan, zorluklara alışır.' },
+  { title: 'Yazın yorulmayan, kışın kurulmaz.', meaning: 'Yazın çalışmayan, kışın zahmet çeker.' },
+  { title: 'Yel esmeyince yaprak oynamaz.', meaning: 'Her olayın bir sebebi vardır.' },
+  { title: 'Yel kayadan sadece toz koparır.', meaning: 'Güçlüye zarar verilemez.' },
+  { title: 'Yemin etsem başım ağrımaz.', meaning: 'Sözüme güven olmaz, yemin etmem gerekir.' },
+  { title: 'Yengece \'Niçin yan yan gidersin?\' demişler, \'Serde kabadayılık var.\' demiş.', meaning: 'Kişi kusurunu kabadayılıkla örtmeye çalışır.' },
+  { title: 'Yeni ay doğunca eski ay görünmez olur.', meaning: 'Yenilik çıkınca eskisi unutulur.' },
+  { title: 'Yenik pehlivan güreşten bıkmaz.', meaning: 'Kaybeden kişi tekrar denemekten vazgeçmez.' },
+  { title: 'Yerde yatan yumurta, gökte uçan kuş olur.', meaning: 'Önemsiz görünen değerlenir.' },
+  { title: 'Yerdeki yüze basılmaz.', meaning: 'Düşene saygı gösterilir.' },
+  { title: 'Yerin kulağı var.', meaning: 'Gizli şeyler duyulur.' },
+  { title: 'Yerini bilmeyen, yurdundan olur.', meaning: 'Haddini bilmeyen zarar görür.' },
+  { title: 'Yılana yumuşak diye el sunma.', meaning: 'Zararlı kişiye güvenilmez.' },
+  { title: 'Yılanın başı küçükken ezilir.', meaning: 'Sorun büyümeden çözülmelidir.' },
+  { title: 'Yılanın sevmediği ot, deliğinin ağzında biter.', meaning: 'İnsan sevmediği şeyle karşılaşır.' },
+  { title: 'Yırtıcı kuşun ömrü az olur.', meaning: 'Sert, saldırgan kişiler uzun yaşamaz.' },
+  { title: 'Yiğit bin yaşar, fırsat bir düşer.', meaning: 'Fırsat çok değerlidir, az gelir.' },
+  { title: 'Yoğurdum ekşidir diyen olmaz.', meaning: 'Kimse malının kötülüğünü söylemez.' },
+  { title: 'Yoksul, ata binse selam almaz.', meaning: 'Fakirin elindekine değer verilmez.' },
+  { title: 'Yol bilen kervana katılmaz.', meaning: 'Bilgili kişi yanlış yapmaz.' },
+  { title: 'Yol bilenle yürüyen, yorulmaz.', meaning: 'Yol gösterenle olan, kolay ilerler.' },
+  { title: 'Yol ile giden yorulmaz.', meaning: 'Düzenli, doğru iş yoran olmaz.' },
+  { title: 'Yol sormakla bulunur.', meaning: 'Bilmediğini sormak gerekir.' },
+  { title: 'Yoldaki kuş, eldeki serçeye değmez.', meaning: 'Elindekini bırakıp olmayana güvenme.' },
+  { title: 'Yorgan gitti, kavga bitti.', meaning: 'Tartışma sebebi ortadan kalkınca kavga biter.' },
+  { title: 'Yumuşak huylu atın çiftesi pek olur.', meaning: 'Sakin görünenin tepkisi ağır olur.' },
+  { title: 'Yuvarlanan taş yosun tutmaz.', meaning: 'Yerinde durmayan insan mal tutamaz.' },
+  { title: 'Yüksekten uçan, alçak iner.', meaning: 'Büyüklenen sonunda küçük düşer.' },
+  { title: 'Yüzü güzel olanın huyu da güzel olur.', meaning: 'Dışı güzel olanın huyu da iyi sanılır.' },
+  { title: 'Zaman her şeyin ilacıdır.', meaning: 'Zaman, her şeyi çözer.' },
+  { title: 'Zaman sana uymazsa sen zamana uy.', meaning: 'Duruma ayak uydurmak gerekir.' },
+  { title: 'Zararın neresinden dönülse kârdır.', meaning: 'Yanlıştan dönmek her zaman faydalıdır.' },
+  { title: 'Zengin kesesini döver, züğürt dizini.', meaning: 'Zengin para harcar, fakir üzülür.' },
+  { title: 'Zenginin horozu bile yumurtlar.', meaning: 'Zenginin imkânları sınırsızdır.' },
+  { title: 'Zenginin sermayesi kasasında, âlimin sermayesi kafasında.', meaning: 'Zenginin serveti maldadır, âliminki bilgidedir.' },
+  { title: 'Ziyan olan koyunun kuyruğu yağlı olur.', meaning: 'Kaybedilen şey değerli çıkar.' },
+  { title: 'Zora dağlar dayanmaz.', meaning: 'Büyük zorluklar bile aşılır.' },
+  { title: 'Zürefanın düşkünü beyaz giyer kış günü.', meaning: 'Görgüsüz kişi, yersiz gösteriş yapar.' },
+  { title: 'Zor oyunu bozar.', meaning: 'Güçlü olan, oyunu kendi lehine çevirir.' }
+        ];
+
+        // Uygulama durumu
+        let state = {
+            currentQuestions: [],
+            currentQuestionIndex: 0,
+            score: 0,
+            wrongAnswers: [],
+            totalQuestions: 10,
+            soundEnabled: true
+        };
+
+        // DOM elementleri
+        const mainScreen = document.getElementById('main-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionElement = document.getElementById('current-question');
+        const scoreElement = document.getElementById('score');
+        const feedbackElement = document.getElementById('feedback');
+        const finalScoreElement = document.getElementById('final-score');
+        const wrongAnswersContainer = document.getElementById('wrong-answers-container');
+        const soundToggle = document.getElementById('sound-toggle');
+        const homeBtn = document.getElementById('home-btn');
+
+        // Ses efektleri için AudioContext
+        let audioContext;
+        let gainNode;
+
+        // Ses sistemi başlatma
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioContext.createGain();
+                gainNode.connect(audioContext.destination);
+                console.log('Ses sistemi başlatıldı');
+            } catch (e) {
+                console.log('Ses sistemi başlatılamadı:', e);
+            }
+        }
+
+        // Ses efekti oluşturma
+        function playSound(frequency, duration, type = 'sine') {
+            if (!state.soundEnabled || !audioContext) return;
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const envelope = audioContext.createGain();
+
+                oscillator.connect(envelope);
+                envelope.connect(gainNode);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+
+                envelope.gain.setValueAtTime(0, audioContext.currentTime);
+                envelope.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
+                envelope.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                console.log('Ses çalınamadı:', e);
+            }
+        }
+
+        // Doğru cevap sesi
+        function playCorrectSound() {
+            playSound(523.25, 0.5, 'sine'); // Do
+            setTimeout(() => playSound(659.25, 0.5, 'sine'), 100); // Mi
+            setTimeout(() => playSound(783.99, 0.5, 'sine'), 200); // Sol
+        }
+
+        // Yanlış cevap sesi
+        function playWrongSound() {
+            playSound(220, 0.8, 'sawtooth');
+            setTimeout(() => playSound(196, 0.8, 'sawtooth'), 100);
+        }
+
+        // Tık sesi
+        function playClickSound() {
+            playSound(330, 0.1, 'square');
+        }
+
+        // Ses kontrolü
+        soundToggle.addEventListener('click', () => {
+            state.soundEnabled = !state.soundEnabled;
+            soundToggle.textContent = state.soundEnabled ? '🔊' : '🔈';
+            soundToggle.classList.toggle('muted', !state.soundEnabled);
+            
+            if (state.soundEnabled) {
+                playClickSound();
+            }
+        });
+
+        // Ana sayfa butonu
+        homeBtn.addEventListener('click', () => {
+            if (state.soundEnabled) playClickSound();
+            showScreen(mainScreen);
+        });
+
+        // Başlatma butonları
+        document.getElementById('start-10').addEventListener('click', () => {
+            if (state.soundEnabled) playClickSound();
+            startQuiz(10);
+        });
+        document.getElementById('start-20').addEventListener('click', () => {
+            if (state.soundEnabled) playClickSound();
+            startQuiz(20);
+        });
+        document.getElementById('start-30').addEventListener('click', () => {
+            if (state.soundEnabled) playClickSound();
+            startQuiz(30);
+        });
+
+        // Yeniden başlatma butonu
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            if (state.soundEnabled) playClickSound();
+            showScreen(mainScreen);
+        });
+
+        // Yanlışları tekrar sorma butonu
+        document.getElementById('retry-wrong-btn').addEventListener('click', () => {
+            if (state.soundEnabled) playClickSound();
+            if (state.wrongAnswers.length > 0) {
+                state.currentQuestions = [...state.wrongAnswers];
+                state.currentQuestionIndex = 0;
+                state.score = 0;
+                state.totalQuestions = state.wrongAnswers.length;
+                state.wrongAnswers = [];
+                showScreen(quizScreen);
+                loadQuestion();
+            }
+        });
+
+        // Quiz başlatma
+        function startQuiz(totalQuestions) {
+            // Rastgele sorular seç
+            const shuffled = [...proverbs].sort(() => 0.5 - Math.random());
+            state.currentQuestions = shuffled.slice(0, totalQuestions);
+            state.currentQuestionIndex = 0;
+            state.score = 0;
+            state.wrongAnswers = [];
+            state.totalQuestions = totalQuestions;
+            
+            showScreen(quizScreen);
+            loadQuestion();
+        }
+
+        // Soru yükleme
+        function loadQuestion() {
+            if (state.currentQuestionIndex >= state.currentQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const currentQuestion = state.currentQuestions[state.currentQuestionIndex];
+            questionText.textContent = `"${currentQuestion.title}" atasözünün anlamı nedir?`;
+            
+            // İlerleme ve skor güncelleme
+            currentQuestionElement.textContent = `Soru ${state.currentQuestionIndex + 1}/${state.totalQuestions}`;
+            scoreElement.textContent = `Doğru: ${state.score} | Yanlış: ${state.wrongAnswers.length}`;
+            feedbackElement.textContent = '';
+
+            // Seçenekleri oluştur
+            optionsContainer.innerHTML = '';
+            
+            // Doğru cevabı ve yanlış seçenekleri seç
+            const correctAnswer = currentQuestion.meaning;
+            const wrongAnswers = getWrongAnswers(currentQuestion);
+            
+            // Tüm seçenekleri birleştir ve karıştır
+            const allOptions = [correctAnswer, ...wrongAnswers];
+            const shuffledOptions = [...allOptions].sort(() => 0.5 - Math.random());
+            
+            // Seçenekleri ekrana ekle
+            shuffledOptions.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.addEventListener('click', () => {
+                    if (state.soundEnabled) playClickSound();
+                    checkAnswer(option, correctAnswer, currentQuestion);
+                });
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        // Yanlış cevapları alma
+        function getWrongAnswers(currentQuestion) {
+            const wrongAnswers = [];
+            const usedIndices = new Set();
+            
+            // Mevcut sorunun indeksini kullanılanlara ekle
+            const currentIndex = proverbs.findIndex(p => p.title === currentQuestion.title);
+            usedIndices.add(currentIndex);
+            
+            // 2 yanlış cevap seç
+            while (wrongAnswers.length < 2 && usedIndices.size < proverbs.length) {
+                const randomIndex = Math.floor(Math.random() * proverbs.length);
+                if (!usedIndices.has(randomIndex)) {
+                    wrongAnswers.push(proverbs[randomIndex].meaning);
+                    usedIndices.add(randomIndex);
+                }
+            }
+            
+            return wrongAnswers;
+        }
+
+        // Cevabı kontrol etme
+        function checkAnswer(selectedOption, correctAnswer, currentQuestion) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.add('disabled'));
+
+            if (selectedOption === correctAnswer) {
+                // Doğru cevap
+                options.forEach(option => {
+                    if (option.textContent === correctAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+                state.score++;
+                feedbackElement.textContent = 'Doğru! 🎉';
+                feedbackElement.style.color = '#2ecc71';
+                
+                if (state.soundEnabled) {
+                    playCorrectSound();
+                }
+            } else {
+                // Yanlış cevap
+                options.forEach(option => {
+                    if (option.textContent === correctAnswer) {
+                        option.classList.add('show-correct');
+                    } else if (option.textContent === selectedOption) {
+                        option.classList.add('incorrect');
+                    }
+                });
+                
+                // Yanlış cevaplanan soruyu kaydet
+                state.wrongAnswers.push(currentQuestion);
+                
+                feedbackElement.textContent = 'Yanlış! Doğru cevap işaretlendi.';
+                feedbackElement.style.color = '#e74c3c';
+                
+                if (state.soundEnabled) {
+                    playWrongSound();
+                }
+            }
+
+            // Sonraki soruya geç
+            setTimeout(() => {
+                state.currentQuestionIndex++;
+                loadQuestion();
+            }, 2000);
+        }
+
+        // Sonuçları gösterme
+        function showResults() {
+            showScreen(resultScreen);
+            
+            const percentage = Math.round((state.score / state.totalQuestions) * 100);
+            let message = '';
+            
+            if (percentage === 100) {
+                message = 'Mükemmel! Tüm soruları doğru cevapladınız! 🏆';
+                if (state.soundEnabled) {
+                    // Zafer sesi
+                    playSound(523.25, 0.3, 'sine');
+                    setTimeout(() => playSound(659.25, 0.3, 'sine'), 300);
+                    setTimeout(() => playSound(783.99, 0.3, 'sine'), 600);
+                    setTimeout(() => playSound(1046.50, 0.5, 'sine'), 900);
+                }
+            } else if (percentage >= 80) {
+                message = 'Çok iyi! Atasözlerini iyi biliyorsunuz! 👍';
+            } else if (percentage >= 60) {
+                message = 'Güzel! Biraz daha çalışırsanız daha iyi olacaksınız. 💪';
+            } else {
+                message = 'Daha fazla pratik yapmalısınız. Pes etmeyin! 📚';
+            }
+            
+            finalScoreElement.textContent = `${state.totalQuestions} sorudan ${state.score} doğru cevap verdiniz. (${percentage}%) - ${message}`;
+            
+            // Yanlış cevaplanan soruları göster
+            wrongAnswersContainer.innerHTML = '<h3 class="wrong-title">Yanlış Cevapladığınız Sorular</h3>';
+            
+            if (state.wrongAnswers.length === 0) {
+                wrongAnswersContainer.innerHTML += '<p>Tebrikler! Hiç yanlış cevabınız yok.</p>';
+            } else {
+                state.wrongAnswers.forEach((question, index) => {
+                    const wrongItem = document.createElement('div');
+                    wrongItem.className = 'wrong-item';
+                    wrongItem.innerHTML = `
+                        <div class="wrong-question">${index + 1}. "${question.title}"</div>
+                        <div class="wrong-correct">Doğru cevap: ${question.meaning}</div>
+                    `;
+                    wrongAnswersContainer.appendChild(wrongItem);
+                });
+            }
+        }
+
+        // Ekran değiştirme
+        function showScreen(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            screen.classList.add('active');
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+            
+            // Kullanıcı etkileşimi için ses başlatma
+            document.body.addEventListener('click', function initAudioOnClick() {
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                document.body.removeEventListener('click', initAudioOnClick);
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>
